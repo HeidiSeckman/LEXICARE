@@ -37,7 +37,7 @@ st.markdown(
     @import url('https://googleapis.com');
 
     .stApp {
-        background: radial-gradient(circle at 20% 10%, #12474f 0%, #08232a 50%, #041317 100%) !important;
+        background: radial-gradient(circle at 20% 10%, #144d56 0%, #08232a 52%, #041216 100%) !important;
         color: #f3f7f5 !important;
     }
 
@@ -151,6 +151,26 @@ st.markdown(
         overflow: hidden;
     }
 
+    .sanctuary-pattern {
+        position: absolute;
+        inset: -10%;
+        opacity: 0.085;
+        background-image: url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 160 160' xmlns='http://w3.org fill='none' stroke='%23e8d5b5' stroke-width='0.9'%3E%3Ccircle cx='80' cy='80' r='58'/%3E%3Ccircle cx='80' cy='80' r='38'/%3E%3Cpath d='M80 22 C96 48 96 68 80 80 C64 68 64 48 80 22 Z'/%3E%3Cpath d='M80 138 C96 112 96 92 80 80 C64 92 64 112 80 138 Z'/%3E%3Cpath d='M22 80 C48 64 68 64 80 80 C68 96 48 96 22 80 Z'/%3E%3Cpath d='M138 80 C112 64 92 64 80 80 C92 96 112 96 138 80 Z'/%3E%3Cpath d='M39 39 C64 48 74 58 80 80 C58 74 48 64 39 39 Z'/%3E%3Cpath d='M121 121 C96 112 86 102 80 80 C102 86 112 96 121 121 Z'/%3E%3Cpath d='M121 39 C112 64 102 74 80 80 C86 58 96 48 121 39 Z'/%3E%3Cpath d='M39 121 C48 96 58 86 80 80 C74 102 64 112 39 121 Z'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: 160px 160px;
+        animation: patternFloat 48s linear infinite;
+    }
+
+    .sanctuary-bokeh {
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(circle at 14% 28%, rgba(235, 213, 179, 0.14) 0px, transparent 95px),
+            radial-gradient(circle at 22% 68%, rgba(126, 224, 210, 0.14) 0px, transparent 120px),
+            radial-gradient(circle at 76% 22%, rgba(235, 213, 179, 0.11) 0px, transparent 110px),
+            radial-gradient(circle at 48% 52%, rgba(72, 188, 178, 0.09) 0px, transparent 180px);
+        animation: bokehBreathe 11s ease-in-out infinite alternate;
+    }
+
     .waterfall-column {
         position: absolute;
         top: 0;
@@ -210,6 +230,16 @@ st.markdown(
         animation: waveRoll 14s linear infinite;
     }
 
+    @keyframes patternFloat {
+        0% { transform: translate(0px, 0px); }
+        100% { transform: translate(160px, 160px); }
+    }
+
+    @keyframes bokehBreathe {
+        0% { opacity: 0.65; transform: scale(1); }
+        100% { opacity: 1; transform: scale(1.04); }
+    }
+
     @keyframes cascadeFall {
         0% { transform: translateY(0%); }
         100% { transform: translateY(50%); }
@@ -227,6 +257,8 @@ st.markdown(
     </style>
 
     <div class="sanctuary-water">
+        <div class="sanctuary-pattern"></div>
+        <div class="sanctuary-bokeh"></div>
         <div class="waterfall-column">
             <div class="waterfall-streams"></div>
         </div>
