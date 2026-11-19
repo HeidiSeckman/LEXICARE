@@ -41,10 +41,12 @@ st.markdown(
         color: #f3f7f5 !important;
     }
 
-    [data-testid="stAppViewContainer"], .main, .block-container {
+    [data-testid="stAppViewContainer"] > .main,
+    [data-testid="stMainBlockContainer"],
+    .block-container {
         background: transparent !important;
-        position: relative;
-        z-index: 2;
+        position: relative !important;
+        z-index: 10 !important;
     }
 
     p, label, li, .stMarkdown, input, textarea {
@@ -60,16 +62,18 @@ st.markdown(
     [data-testid="stHeader"] {
         background: rgba(4, 19, 23, 0.45) !important;
         backdrop-filter: blur(10px);
+        z-index: 20 !important;
     }
 
     [data-testid="stSidebar"] {
-        background: rgba(6, 25, 31, 0.92) !important;
+        background: rgba(6, 25, 31, 0.94) !important;
         backdrop-filter: blur(18px);
         border-right: 1px solid rgba(226, 194, 144, 0.24);
+        z-index: 25 !important;
     }
 
     .lexi-hero {
-        background: linear-gradient(145deg, rgba(16, 54, 62, 0.82), rgba(7, 26, 33, 0.90));
+        background: linear-gradient(145deg, rgba(16, 54, 62, 0.86), rgba(7, 26, 33, 0.92));
         backdrop-filter: blur(18px);
         border: 1px solid rgba(226, 194, 144, 0.35);
         border-radius: 24px;
@@ -101,18 +105,18 @@ st.markdown(
     }
 
     [data-testid="stChatMessage"] {
-        background: rgba(11, 40, 48, 0.86) !important;
+        background: rgba(11, 40, 48, 0.90) !important;
         backdrop-filter: blur(14px);
-        border: 1px solid rgba(132, 212, 198, 0.26);
+        border: 1px solid rgba(132, 212, 198, 0.28);
         border-radius: 18px;
         padding: 1.1rem 1.3rem;
         margin-bottom: 0.8rem;
-        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.28);
+        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.32);
     }
 
     [data-testid="stVerticalBlockBorderWrapper"],
     [data-testid="stExpander"] {
-        background: rgba(9, 32, 39, 0.88) !important;
+        background: rgba(9, 32, 39, 0.90) !important;
         border: 1px solid rgba(226, 194, 144, 0.28) !important;
         border-radius: 16px !important;
     }
@@ -120,7 +124,7 @@ st.markdown(
     .stButton > button {
         border-radius: 12px !important;
         border: 1px solid rgba(226, 194, 144, 0.38) !important;
-        background: rgba(15, 52, 62, 0.88) !important;
+        background: rgba(15, 52, 62, 0.92) !important;
         color: #f6f8f7 !important;
         transition: all 0.22s ease;
     }
@@ -137,7 +141,7 @@ st.markdown(
     }
 
     textarea, input, [data-testid="stChatInput"] textarea {
-        background-color: rgba(6, 23, 29, 0.94) !important;
+        background-color: rgba(6, 23, 29, 0.95) !important;
         color: #f5f9f7 !important;
         border: 1px solid rgba(226, 194, 144, 0.38) !important;
         border-radius: 14px !important;
@@ -147,44 +151,36 @@ st.markdown(
         position: fixed;
         inset: 0;
         pointer-events: none;
-        z-index: 1;
+        z-index: 0 !important;
         overflow: hidden;
     }
 
-    .sanctuary-pattern {
+    .lotus-flower {
         position: absolute;
-        inset: -10%;
-        opacity: 0.085;
-        background-image: url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 160 160' xmlns='http://w3.org fill='none' stroke='%23e8d5b5' stroke-width='0.9'%3E%3Ccircle cx='80' cy='80' r='58'/%3E%3Ccircle cx='80' cy='80' r='38'/%3E%3Cpath d='M80 22 C96 48 96 68 80 80 C64 68 64 48 80 22 Z'/%3E%3Cpath d='M80 138 C96 112 96 92 80 80 C64 92 64 112 80 138 Z'/%3E%3Cpath d='M22 80 C48 64 68 64 80 80 C68 96 48 96 22 80 Z'/%3E%3Cpath d='M138 80 C112 64 92 64 80 80 C92 96 112 96 138 80 Z'/%3E%3Cpath d='M39 39 C64 48 74 58 80 80 C58 74 48 64 39 39 Z'/%3E%3Cpath d='M121 121 C96 112 86 102 80 80 C102 86 112 96 121 121 Z'/%3E%3Cpath d='M121 39 C112 64 102 74 80 80 C86 58 96 48 121 39 Z'/%3E%3Cpath d='M39 121 C48 96 58 86 80 80 C74 102 64 112 39 121 Z'/%3E%3C/g%3E%3C/svg%3E");
-        background-size: 160px 160px;
-        animation: patternFloat 48s linear infinite;
+        opacity: 0.26;
+        filter: drop-shadow(0 0 12px rgba(235, 213, 179, 0.25));
+        animation: lotusDrift 18s ease-in-out infinite alternate;
     }
 
-    .sanctuary-bokeh {
-        position: absolute;
-        inset: 0;
-        background-image:
-            radial-gradient(circle at 14% 28%, rgba(235, 213, 179, 0.14) 0px, transparent 95px),
-            radial-gradient(circle at 22% 68%, rgba(126, 224, 210, 0.14) 0px, transparent 120px),
-            radial-gradient(circle at 76% 22%, rgba(235, 213, 179, 0.11) 0px, transparent 110px),
-            radial-gradient(circle at 48% 52%, rgba(72, 188, 178, 0.09) 0px, transparent 180px);
-        animation: bokehBreathe 11s ease-in-out infinite alternate;
-    }
+    .lotus-1 { top: 10%; left: 4%; width: 170px; animation-duration: 16s; }
+    .lotus-2 { top: 48%; left: 2%; width: 220px; opacity: 0.22; animation-duration: 21s; }
+    .lotus-3 { bottom: 12%; left: 8%; width: 150px; animation-duration: 19s; }
+    .lotus-4 { top: 18%; right: 16%; width: 160px; opacity: 0.20; animation-duration: 23s; }
 
     .waterfall-column {
         position: absolute;
         top: 0;
-        right: 3%;
-        width: 190px;
+        right: 0;
+        width: 145px;
         height: 100vh;
         background: linear-gradient(
             180deg,
-            rgba(180, 245, 238, 0.02) 0%,
-            rgba(130, 232, 224, 0.16) 45%,
-            rgba(195, 250, 244, 0.32) 100%
+            rgba(180, 245, 238, 0.04) 0%,
+            rgba(130, 232, 224, 0.20) 45%,
+            rgba(195, 250, 244, 0.38) 100%
         );
-        mask-image: linear-gradient(90deg, transparent 0%, black 22%, black 78%, transparent 100%);
-        -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 22%, black 78%, transparent 100%);
+        mask-image: linear-gradient(90deg, transparent 0%, black 35%, black 100%);
+        -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 35%, black 100%);
     }
 
     .waterfall-streams {
@@ -194,12 +190,12 @@ st.markdown(
             repeating-linear-gradient(
                 90deg,
                 transparent 0px,
-                rgba(220, 252, 248, 0.24) 3px,
+                rgba(220, 252, 248, 0.28) 3px,
                 transparent 7px,
-                rgba(115, 218, 210, 0.18) 14px,
+                rgba(115, 218, 210, 0.22) 14px,
                 transparent 22px
             ),
-            radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+            radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.28) 0%, transparent 60%);
         background-size: 100% 220px, 100% 340px;
         animation: cascadeFall 2.6s linear infinite;
     }
@@ -207,14 +203,14 @@ st.markdown(
     .waterfall-mist-pool {
         position: absolute;
         bottom: -25px;
-        right: -2%;
-        width: 340px;
-        height: 130px;
+        right: -10px;
+        width: 280px;
+        height: 120px;
         border-radius: 50%;
         background: radial-gradient(
             ellipse at center,
-            rgba(215, 252, 248, 0.42) 0%,
-            rgba(82, 204, 196, 0.22) 48%,
+            rgba(215, 252, 248, 0.45) 0%,
+            rgba(82, 204, 196, 0.24) 48%,
             transparent 75%
         );
         filter: blur(10px);
@@ -226,18 +222,13 @@ st.markdown(
         bottom: -8px;
         left: 0;
         width: 200%;
-        height: 155px;
+        height: 145px;
         animation: waveRoll 14s linear infinite;
     }
 
-    @keyframes patternFloat {
-        0% { transform: translate(0px, 0px); }
-        100% { transform: translate(160px, 160px); }
-    }
-
-    @keyframes bokehBreathe {
-        0% { opacity: 0.65; transform: scale(1); }
-        100% { opacity: 1; transform: scale(1.04); }
+    @keyframes lotusDrift {
+        0% { transform: translateY(0px) rotate(0deg) scale(1); }
+        100% { transform: translateY(-22px) rotate(12deg) scale(1.06); }
     }
 
     @keyframes cascadeFall {
@@ -257,19 +248,43 @@ st.markdown(
     </style>
 
     <div class="sanctuary-water">
-        <div class="sanctuary-pattern"></div>
-        <div class="sanctuary-bokeh"></div>
+        <svg class="lotus-flower lotus-1" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.6">
+            <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
+            <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
+            <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
+            <path d="M100 115 C58 112 28 96 16 74 C46 72 76 88 100 115 Z"/>
+            <path d="M100 115 C142 112 172 96 184 74 C154 72 124 88 100 115 Z"/>
+            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.4"/>
+        </svg>
+
+        <svg class="lotus-flower lotus-2" viewBox="0 0 200 200" fill="none" stroke="#9ef0e0" stroke-width="1.4">
+            <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
+            <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
+            <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
+            <path d="M100 115 C58 112 28 96 16 74 C46 72 76 88 100 115 Z"/>
+            <path d="M100 115 C142 112 172 96 184 74 C154 72 124 88 100 115 Z"/>
+            <path d="M45 128 Q100 148 155 128" stroke="#ebd5b3" stroke-width="1.4"/>
+        </svg>
+
+        <svg class="lotus-flower lotus-3" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.5">
+            <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
+            <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
+            <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
+            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.4"/>
+        </svg>
+
+        <svg class="lotus-flower lotus-4" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.5">
+            <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
+            <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
+            <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
+            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.4"/>
+        </svg>
+
         <div class="waterfall-column">
             <div class="waterfall-streams"></div>
         </div>
         <div class="waterfall-mist-pool"></div>
         <svg class="lagoon-wave" viewBox="0 0 1440 160" preserveAspectRatio="none">
-            <path d="M0,75 C360,145 720,5 1080,85 C1260,120 1350,95 1440,75 L1440,160 L0,160 Z" fill="rgba(45, 175, 168, 0.24)"></path>
-        </svg>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
 @st.cache_data(show_spinner=False)
 def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
     sample_rate = 22050
