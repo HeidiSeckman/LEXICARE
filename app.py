@@ -35,135 +35,169 @@ st.markdown(
     <style>
     @import url('https://googleapis.com');
 
-    @keyframes sanctuaryTide {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-
     .stApp {
-        background: radial-gradient(circle at 18% 15%, #13444b 0%, #09242b 45%, #051419 100%);
-        background-size: 200% 200%;
-        animation: sanctuaryTide 24s ease infinite;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        color: #f4f7f5 !important;
+        background: radial-gradient(circle at 20% 10%, #12474f 0%, #08232a 50%, #041317 100%) !important;
+        color: #f3f7f5 !important;
     }
 
-    .stApp p, .stApp span, .stApp label, .stApp li, .stApp div,
-    .stMarkdown, .stCaption, [data-testid="stCaptionContainer"] {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        color: #edf4f1 !important;
-        letter-spacing: 0.01em;
+    [data-testid="stAppViewContainer"], .main, .block-container {
+        background: transparent !important;
     }
 
-    .stApp h1, .stApp h2, .stApp h3 {
+    p, label, li, .stMarkdown, input, textarea {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        color: #eef5f2 !important;
+    }
+
+    h1, h2, h3 {
         font-family: 'Cormorant Garamond', Georgia, serif !important;
         color: #ffffff !important;
-        letter-spacing: 0.02em;
     }
 
     [data-testid="stHeader"] {
-        background: rgba(5, 20, 25, 0.35) !important;
-        backdrop-filter: blur(12px);
+        background: rgba(4, 19, 23, 0.45) !important;
+        backdrop-filter: blur(10px);
     }
 
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, rgba(8, 29, 36, 0.92), rgba(5, 19, 24, 0.96)) !important;
-        backdrop-filter: blur(22px);
-        border-right: 1px solid rgba(226, 194, 144, 0.22);
+        background: rgba(6, 25, 31, 0.92) !important;
+        backdrop-filter: blur(18px);
+        border-right: 1px solid rgba(226, 194, 144, 0.24);
     }
 
     .lexi-hero {
-        position: relative;
-        background: linear-gradient(145deg, rgba(16, 52, 60, 0.78), rgba(8, 28, 35, 0.88));
-        backdrop-filter: blur(22px);
-        border: 1px solid rgba(226, 194, 144, 0.32);
-        border-radius: 26px;
-        padding: 1.8rem 2rem;
+        background: linear-gradient(145deg, rgba(16, 54, 62, 0.82), rgba(7, 26, 33, 0.90));
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(226, 194, 144, 0.35);
+        border-radius: 24px;
+        padding: 1.6rem 1.8rem;
         text-align: center;
-        margin-bottom: 1.25rem;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        margin-bottom: 1rem;
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.4);
     }
 
     .lexi-hero h1 {
         margin: 0;
-        font-family: 'Cormorant Garamond', Georgia, serif !important;
-        font-size: 2.85rem !important;
-        font-weight: 600 !important;
-        background: linear-gradient(90deg, #ffffff, #e8d5b5, #b9efe4);
+        font-size: 2.75rem !important;
+        background: linear-gradient(90deg, #ffffff, #ebd5b3, #b4f0e4);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
 
     .lexi-badge {
         display: inline-block;
-        margin-top: 0.5rem;
-        padding: 0.3rem 1.05rem;
+        margin-top: 0.45rem;
+        padding: 0.28rem 1rem;
         border-radius: 999px;
-        background: rgba(226, 194, 144, 0.12);
-        border: 1px solid rgba(226, 194, 144, 0.38);
-        color: #f0dec0 !important;
-        font-size: 0.78rem !important;
-        font-weight: 500;
+        background: rgba(226, 194, 144, 0.14);
+        border: 1px solid rgba(226, 194, 144, 0.4);
+        color: #f2dfc1 !important;
+        font-size: 0.76rem;
         letter-spacing: 0.12em;
         text-transform: uppercase;
     }
 
     [data-testid="stChatMessage"] {
-        background: linear-gradient(145deg, rgba(14, 46, 55, 0.82), rgba(9, 32, 39, 0.88)) !important;
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(132, 212, 198, 0.22);
-        border-radius: 20px;
-        padding: 1.15rem 1.35rem;
-        margin-bottom: 0.85rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
-        line-height: 1.65;
+        background: rgba(11, 40, 48, 0.85) !important;
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(132, 212, 198, 0.26);
+        border-radius: 18px;
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 0.8rem;
+        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.28);
     }
 
     [data-testid="stVerticalBlockBorderWrapper"],
     [data-testid="stExpander"] {
-        background: rgba(10, 35, 42, 0.85) !important;
-        border: 1px solid rgba(226, 194, 144, 0.26) !important;
-        border-radius: 18px !important;
+        background: rgba(9, 32, 39, 0.88) !important;
+        border: 1px solid rgba(226, 194, 144, 0.28) !important;
+        border-radius: 16px !important;
     }
 
     .stButton > button {
-        border-radius: 14px !important;
-        border: 1px solid rgba(226, 194, 144, 0.34) !important;
-        background: rgba(16, 54, 64, 0.82) !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(226, 194, 144, 0.38) !important;
+        background: rgba(15, 52, 62, 0.88) !important;
         color: #f6f8f7 !important;
-        font-weight: 500 !important;
-        padding: 0.55rem 1rem !important;
-        transition: all 0.25s ease;
+        transition: all 0.22s ease;
     }
 
     .stButton > button:hover {
-        background: linear-gradient(135deg, rgba(44, 126, 124, 0.9), rgba(26, 86, 92, 0.95)) !important;
+        background: rgba(38, 114, 116, 0.95) !important;
         border-color: #ebd3aa !important;
         color: #ffffff !important;
-        box-shadow: 0 6px 20px rgba(84, 196, 182, 0.22);
-        transform: translateY(-1px);
     }
 
     .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #2d8f85, #1c6564) !important;
+        background: linear-gradient(135deg, #2b8c82, #1b6362) !important;
         border: 1px solid #ebd3aa !important;
-        color: #ffffff !important;
     }
 
     textarea, input, [data-testid="stChatInput"] textarea {
-        background-color: rgba(7, 25, 31, 0.92) !important;
+        background-color: rgba(6, 23, 29, 0.94) !important;
         color: #f5f9f7 !important;
-        border: 1px solid rgba(226, 194, 144, 0.35) !important;
+        border: 1px solid rgba(226, 194, 144, 0.38) !important;
         border-radius: 14px !important;
     }
 
-    [data-baseweb="select"] > div {
-        background-color: rgba(7, 25, 31, 0.92) !important;
-        color: #f5f9f7 !important;
-        border-color: rgba(226, 194, 144, 0.35) !important;
+    .ocean-backdrop {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    .waterfall-shimmer {
+        position: absolute;
+        inset: -50% 0 0 0;
+        background: repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            rgba(162, 238, 228, 0.045) 22px,
+            transparent 44px
+        );
+        animation: fallDown 9s linear infinite;
+    }
+
+    .wave-layer {
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 200%;
+        height: 185px;
+        animation: waveRoll 13s linear infinite;
+    }
+
+    .wave-layer-2 {
+        position: absolute;
+        bottom: -14px;
+        left: 0;
+        width: 200%;
+        height: 150px;
+        animation: waveRoll 19s linear infinite reverse;
+    }
+
+    @keyframes fallDown {
+        0% { transform: translateY(0%); }
+        100% { transform: translateY(33.3%); }
+    }
+
+    @keyframes waveRoll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
     }
     </style>
+
+    <div class="ocean-backdrop">
+        <div class="waterfall-shimmer"></div>
+        <svg class="wave-layer" viewBox="0 0 1440 160" preserveAspectRatio="none">
+            <path d="M0,60 C360,145 720,-15 1080,75 C1260,120 1350,90 1440,60 L1440,160 L0,160 Z" fill="rgba(45, 175, 168, 0.28)"></path>
+        </svg>
+        <svg class="wave-layer-2" viewBox="0 0 1440 160" preserveAspectRatio="none">
+            <path d="M0,85 C320,15 680,140 1040,70 C1240,35 1360,80 1440,85 L1440,160 L0,160 Z" fill="rgba(142, 232, 220, 0.18)"></path>
+        </svg>
+    </div>
     """,
     unsafe_allow_html=True,
 )
@@ -222,12 +256,12 @@ st.markdown(
 
 components.html(
     """
-    <div style="width:100%; height:145px; border-radius:20px; overflow:hidden; position:relative;
+    <div style="width:100%; height:140px; border-radius:20px; overflow:hidden; position:relative;
                 background: radial-gradient(circle at 50% 50%, rgba(36, 128, 126, 0.28), rgba(6, 22, 28, 0.85));
-                border: 1px solid rgba(226, 194, 144, 0.26); box-shadow: inset 0 0 30px rgba(0,0,0,0.45);">
+                border: 1px solid rgba(226, 194, 144, 0.28); box-shadow: inset 0 0 30px rgba(0,0,0,0.45);">
         <canvas id="orbCanvas" style="width:100%; height:100%; display:block; cursor:grab;"></canvas>
-        <div style="position:absolute; bottom:10px; right:14px; font-family:'Plus Jakarta Sans',sans-serif;
-                    font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(240,222,192,0.72); pointer-events:none;">
+        <div style="position:absolute; bottom:10px; right:14px; font-family:sans-serif;
+                    font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(240,222,192,0.75); pointer-events:none;">
             Move cursor to guide the sanctuary orb
         </div>
     </div>
@@ -320,7 +354,7 @@ components.html(
     animate();
     </script>
     """,
-    height=155,
+    height=150,
 )
 
 render_safety_header()
@@ -379,27 +413,42 @@ def speak_text(text: str, mode: str, safety_level: str):
 
 
 def generate_lexi_reply(system_instruction: str, messages: list) -> str:
-    recent_messages = messages[-8:]
+    convo = [m for m in messages if not m.get("is_greeting")][-10:]
+
+    anti_repeat_rule = (
+        "\nCRITICAL CONVERSATION RULE: Read the entire conversation history carefully. "
+        "NEVER repeat your greeting or repeat sentences you already said. "
+        "Always respond directly, warmly, and naturally to the user's latest message."
+    )
+    full_instruction = system_instruction + anti_repeat_rule
+    last_error = ""
 
     gemini_key = st.secrets.get("GEMINI_API_KEY", "")
     if gemini_key:
-        try:
-            client = genai.Client(api_key=gemini_key)
-            history_text = "\n".join(
-                f"{m['role'].upper()}: {m['content']}" for m in recent_messages
+        client = genai.Client(api_key=gemini_key)
+        gemini_contents = []
+        for m in convo:
+            role = "user" if m["role"] == "user" else "model"
+            gemini_contents.append(
+                types.Content(
+                    role=role,
+                    parts=[types.Part(text=m["content"])],
+                )
             )
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=history_text,
-                config=types.GenerateContentConfig(
-                    system_instruction=system_instruction,
-                    temperature=0.75,
-                ),
-            )
-            if response.text:
-                return response.text
-        except Exception:
-            pass
+        for model_name in ["gemini-2.5-flash", "gemini-2.0-flash"]:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=gemini_contents,
+                    config=types.GenerateContentConfig(
+                        system_instruction=full_instruction,
+                        temperature=0.82,
+                    ),
+                )
+                if response.text:
+                    return response.text.strip()
+            except Exception as e:
+                last_error = str(e)
 
     groq_key = st.secrets.get("GROQ_API_KEY", "")
     if groq_key:
@@ -407,25 +456,23 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
             from groq import Groq
 
             groq_client = Groq(api_key=groq_key)
-            groq_messages = [{"role": "system", "content": system_instruction}]
-            for m in recent_messages:
+            groq_messages = [{"role": "system", "content": full_instruction}]
+            for m in convo:
                 groq_messages.append({"role": m["role"], "content": m["content"]})
 
             completion = groq_client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 messages=groq_messages,
-                temperature=0.75,
+                temperature=0.82,
+                frequency_penalty=0.6,
             )
-            reply_text = completion.choices.message.content
+            reply_text = completion.choices[0].message.content
             if reply_text:
-                return reply_text
-        except Exception:
-            pass
+                return reply_text.strip()
+        except Exception as e:
+            last_error = str(e)
 
-    return (
-        "Hey, I'm still right here with you—my connection just blinked for a second. "
-        "Go ahead and send that one more time."
-    )
+    return f"Connection hiccup ({last_error or 'Missing API key in Streamlit Secrets'}). Check your Secrets tab and try again!"
 
 
 with st.sidebar:
@@ -490,6 +537,7 @@ if not st.session_state.messages:
     st.session_state.messages.append(
         {
             "role": "assistant",
+            "is_greeting": True,
             "content": (
                 "Hey... welcome in. Take a breath, watch the pearl orb drift for a second, and turn on "
                 "some ocean waves or soft rain in the sidebar if you'd like. Whether you want to vent about "
