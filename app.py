@@ -143,7 +143,6 @@ st.markdown(
         border-radius: 14px !important;
     }
 
-    /* Live Cascading Waterfall Column on the Right Side + Glowing Lagoon Pool */
     .sanctuary-water {
         position: fixed;
         inset: 0;
@@ -305,6 +304,8 @@ components.html(
             Move cursor to guide the sanctuary orb
         </div>
     </div>
+    <script>
+    const canvas = document.getElementById('orbCanvas');
 async def _generate_free_voice(text: str, output_path: str, rate: str, pitch: str):
     communicate = edge_tts.Communicate(
         text,
