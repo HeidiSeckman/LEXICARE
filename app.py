@@ -294,7 +294,6 @@ st.markdown(
 )
 
 components.html(
-    """
     <div style="width:100%; height:140px; border-radius:20px; overflow:hidden; position:relative;
                 background: radial-gradient(circle at 50% 50%, rgba(36, 128, 126, 0.28), rgba(6, 22, 28, 0.85));
                 border: 1px solid rgba(226, 194, 144, 0.28); box-shadow: inset 0 0 30px rgba(0,0,0,0.45);">
