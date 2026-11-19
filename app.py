@@ -30,6 +30,7 @@ if "voice_enabled" not in st.session_state:
     st.session_state.voice_enabled = True
 if "chat_mode" not in st.session_state:
     st.session_state.chat_mode = "Just Listen (Vent)"
+
 st.markdown(
     """
     <style>
@@ -42,6 +43,8 @@ st.markdown(
 
     [data-testid="stAppViewContainer"], .main, .block-container {
         background: transparent !important;
+        position: relative;
+        z-index: 2;
     }
 
     p, label, li, .stMarkdown, input, textarea {
@@ -98,7 +101,7 @@ st.markdown(
     }
 
     [data-testid="stChatMessage"] {
-        background: rgba(11, 40, 48, 0.85) !important;
+        background: rgba(11, 40, 48, 0.86) !important;
         backdrop-filter: blur(14px);
         border: 1px solid rgba(132, 212, 198, 0.26);
         border-radius: 18px;
@@ -140,47 +143,82 @@ st.markdown(
         border-radius: 14px !important;
     }
 
-    .ocean-backdrop {
+    /* Live Cascading Waterfall Column on the Right Side + Glowing Lagoon Pool */
+    .sanctuary-water {
         position: fixed;
         inset: 0;
         pointer-events: none;
-        z-index: 0;
+        z-index: 1;
         overflow: hidden;
     }
 
-    .waterfall-shimmer {
+    .waterfall-column {
         position: absolute;
-        inset: -50% 0 0 0;
-        background: repeating-linear-gradient(
-            90deg,
-            transparent 0px,
-            rgba(162, 238, 228, 0.045) 22px,
-            transparent 44px
+        top: 0;
+        right: 3%;
+        width: 190px;
+        height: 100vh;
+        background: linear-gradient(
+            180deg,
+            rgba(180, 245, 238, 0.02) 0%,
+            rgba(130, 232, 224, 0.16) 45%,
+            rgba(195, 250, 244, 0.32) 100%
         );
-        animation: fallDown 9s linear infinite;
+        mask-image: linear-gradient(90deg, transparent 0%, black 22%, black 78%, transparent 100%);
+        -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 22%, black 78%, transparent 100%);
     }
 
-    .wave-layer {
+    .waterfall-streams {
+        position: absolute;
+        inset: -100% 0 0 0;
+        background-image:
+            repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                rgba(220, 252, 248, 0.24) 3px,
+                transparent 7px,
+                rgba(115, 218, 210, 0.18) 14px,
+                transparent 22px
+            ),
+            radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+        background-size: 100% 220px, 100% 340px;
+        animation: cascadeFall 2.6s linear infinite;
+    }
+
+    .waterfall-mist-pool {
+        position: absolute;
+        bottom: -25px;
+        right: -2%;
+        width: 340px;
+        height: 130px;
+        border-radius: 50%;
+        background: radial-gradient(
+            ellipse at center,
+            rgba(215, 252, 248, 0.42) 0%,
+            rgba(82, 204, 196, 0.22) 48%,
+            transparent 75%
+        );
+        filter: blur(10px);
+        animation: mistPulse 3.8s ease-in-out infinite;
+    }
+
+    .lagoon-wave {
         position: absolute;
         bottom: -8px;
         left: 0;
         width: 200%;
-        height: 185px;
-        animation: waveRoll 13s linear infinite;
+        height: 155px;
+        animation: waveRoll 14s linear infinite;
     }
 
-    .wave-layer-2 {
-        position: absolute;
-        bottom: -14px;
-        left: 0;
-        width: 200%;
-        height: 150px;
-        animation: waveRoll 19s linear infinite reverse;
-    }
-
-    @keyframes fallDown {
+    @keyframes cascadeFall {
         0% { transform: translateY(0%); }
-        100% { transform: translateY(33.3%); }
+        100% { transform: translateY(50%); }
+    }
+
+    @keyframes mistPulse {
+        0%, 100% { transform: scale(1) translateY(0px); opacity: 0.75; }
+        50% { transform: scale(1.14) translateY(-8px); opacity: 1; }
     }
 
     @keyframes waveRoll {
@@ -189,18 +227,20 @@ st.markdown(
     }
     </style>
 
-    <div class="ocean-backdrop">
-        <div class="waterfall-shimmer"></div>
-        <svg class="wave-layer" viewBox="0 0 1440 160" preserveAspectRatio="none">
-            <path d="M0,60 C360,145 720,-15 1080,75 C1260,120 1350,90 1440,60 L1440,160 L0,160 Z" fill="rgba(45, 175, 168, 0.28)"></path>
-        </svg>
-        <svg class="wave-layer-2" viewBox="0 0 1440 160" preserveAspectRatio="none">
-            <path d="M0,85 C320,15 680,140 1040,70 C1240,35 1360,80 1440,85 L1440,160 L0,160 Z" fill="rgba(142, 232, 220, 0.18)"></path>
+    <div class="sanctuary-water">
+        <div class="waterfall-column">
+            <div class="waterfall-streams"></div>
+        </div>
+        <div class="waterfall-mist-pool"></div>
+        <svg class="lagoon-wave" viewBox="0 0 1440 160" preserveAspectRatio="none">
+            <path d="M0,75 C360,145 720,5 1080,85 C1260,120 1350,95 1440,75 L1440,160 L0,160 Z" fill="rgba(45, 175, 168, 0.24)"></path>
         </svg>
     </div>
     """,
     unsafe_allow_html=True,
 )
+
+
 @st.cache_data(show_spinner=False)
 def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
     sample_rate = 22050
@@ -265,124 +305,6 @@ components.html(
             Move cursor to guide the sanctuary orb
         </div>
     </div>
-    <script>
-    const canvas = document.getElementById('orbCanvas');
-    const ctx = canvas.getContext('2d');
-    let w, h, dpr;
-    function resize() {
-        dpr = window.devicePixelRatio || 1;
-        w = canvas.clientWidth;
-        h = canvas.clientHeight;
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
-        ctx.scale(dpr, dpr);
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    let mouse = { x: w * 0.5, y: h * 0.5, active: false };
-    let orb = { x: w * 0.5, y: h * 0.5, vx: 0, vy: 0 };
-
-    canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = e.clientX - rect.left;
-        mouse.y = e.clientY - rect.top;
-        mouse.active = true;
-    });
-    canvas.addEventListener('mouseleave', () => { mouse.active = false; });
-
-    const motes = Array.from({ length: 26 }, (_, i) => ({
-        angle: (i / 26) * Math.PI * 2,
-        radius: 34 + (i % 5) * 14,
-        speed: 0.004 + (i % 4) * 0.002,
-        size: 1.5 + (i % 3) * 1.1,
-        zOffset: (i % 7) * 0.4
-    }));
-
-    let tick = 0;
-    function animate() {
-        tick += 0.025;
-        ctx.clearRect(0, 0, w, h);
-
-        const targetX = mouse.active ? mouse.x : (w * 0.5 + Math.cos(tick * 0.6) * 55);
-        const targetY = mouse.active ? mouse.y : (h * 0.5 + Math.sin(tick * 0.8) * 16);
-
-        orb.vx += (targetX - orb.x) * 0.035;
-        orb.vy += (targetY - orb.y) * 0.035;
-        orb.vx *= 0.86;
-        orb.vy *= 0.86;
-        orb.x += orb.vx;
-        orb.y += orb.vy;
-
-        const breath = 46 + Math.sin(tick * 1.2) * 6;
-        const halo = ctx.createRadialGradient(orb.x, orb.y, 4, orb.x, orb.y, breath * 1.85);
-        halo.addColorStop(0, 'rgba(158, 240, 224, 0.45)');
-        halo.addColorStop(0.45, 'rgba(226, 194, 144, 0.16)');
-        halo.addColorStop(1, 'rgba(10, 35, 42, 0)');
-        ctx.fillStyle = halo;
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, breath * 1.85, 0, Math.PI * 2);
-        ctx.fill();
-
-        motes.forEach(m => {
-            m.angle += m.speed;
-            const depth = Math.sin(m.angle + m.zOffset);
-            const mx = orb.x + Math.cos(m.angle) * (m.radius * 1.45);
-            const my = orb.y + depth * (m.radius * 0.42);
-            const scale = 0.65 + (depth + 1) * 0.35;
-            ctx.fillStyle = depth > 0 ? 'rgba(245, 228, 196, 0.82)' : 'rgba(126, 224, 210, 0.42)';
-            ctx.beginPath();
-            ctx.arc(mx, my, m.size * scale, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        const sphereGrad = ctx.createRadialGradient(
-            orb.x - 10, orb.y - 10, 3,
-            orb.x, orb.y, breath * 0.72
-        );
-        sphereGrad.addColorStop(0, '#ffffff');
-        sphereGrad.addColorStop(0.35, '#bff3e8');
-        sphereGrad.addColorStop(0.75, '#3aa89e');
-        sphereGrad.addColorStop(1, 'rgba(18, 72, 76, 0.25)');
-        ctx.fillStyle = sphereGrad;
-        ctx.beginPath();
-        ctx.arc(orb.x, orb.y, breath * 0.72, 0, Math.PI * 2);
-        ctx.fill();
-
-        requestAnimationFrame(animate);
-    }
-    animate();
-    </script>
-    """,
-    height=150,
-)
-
-render_safety_header()
-
-if st.session_state.get("crisis_locked", False):
-    render_crisis_card()
-    st.stop()
-
-if not st.session_state.accepted_terms:
-    with st.container(border=True):
-        st.subheader("Take a slow breath. Welcome to your sanctuary.")
-        st.write(
-            "LexiCare is a peaceful, judgment-free retreat to talk through your day, "
-            "unwind to ocean waves or rain, and reset whenever life feels heavy."
-        )
-        st.info(
-            "**Before stepping inside, please confirm:**\n"
-            "- Lexi is an AI companion—not a licensed therapist, doctor, or counselor.\n"
-            "- Lexi cannot diagnose conditions or automatically call 911 for you.\n"
-            "- If you are ever in immediate danger, tap **Human Support** at the top or call **988** / **911**."
-        )
-        agreed = st.checkbox(
-            "I understand that LexiCare is an AI wellness companion and not medical or therapy care."
-        )
-        if st.button("Enter Sanctuary", type="primary", disabled=not agreed):
-            st.session_state.accepted_terms = True
-            st.rerun()
-    st.stop()
 async def _generate_free_voice(text: str, output_path: str, rate: str, pitch: str):
     communicate = edge_tts.Communicate(
         text,
@@ -423,7 +345,7 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
     full_instruction = system_instruction + anti_repeat_rule
     last_error = ""
 
-    gemini_key = st.secrets.get("GEMINI_API_KEY", "")
+    gemini_key = st.secrets.get("GEMINI_API_KEY", "").strip()
     if gemini_key:
         client = genai.Client(api_key=gemini_key)
         gemini_contents = []
@@ -435,7 +357,7 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
                     parts=[types.Part(text=m["content"])],
                 )
             )
-        for model_name in ["gemini-2.5-flash", "gemini-2.0-flash"]:
+        for model_name in ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"]:
             try:
                 response = client.models.generate_content(
                     model=model_name,
@@ -448,29 +370,42 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
                 if response.text:
                     return response.text.strip()
             except Exception as e:
-                last_error = str(e)
+                last_error = f"Gemini: {e}"
 
-    groq_key = st.secrets.get("GROQ_API_KEY", "")
+    groq_key = st.secrets.get("GROQ_API_KEY", "").strip()
     if groq_key:
         try:
             from groq import Groq
 
             groq_client = Groq(api_key=groq_key)
+            available = [
+                m.id
+                for m in groq_client.models.list().data
+                if "whisper" not in m.id.lower()
+                and "guard" not in m.id.lower()
+                and "tts" not in m.id.lower()
+            ]
+            preferred = [m for m in available if "llama" in m.lower()] + available
+
             groq_messages = [{"role": "system", "content": full_instruction}]
             for m in convo:
                 groq_messages.append({"role": m["role"], "content": m["content"]})
 
-            completion = groq_client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=groq_messages,
-                temperature=0.82,
-                frequency_penalty=0.6,
-            )
-            reply_text = completion.choices[0].message.content
-            if reply_text:
-                return reply_text.strip()
+            for model_id in preferred[:4]:
+                try:
+                    completion = groq_client.chat.completions.create(
+                        model=model_id,
+                        messages=groq_messages,
+                        temperature=0.82,
+                        frequency_penalty=0.6,
+                    )
+                    reply_text = completion.choices[0].message.content
+                    if reply_text:
+                        return reply_text.strip()
+                except Exception as e:
+                    last_error = f"Groq ({model_id}): {e}"
         except Exception as e:
-            last_error = str(e)
+            last_error = f"Groq init: {e}"
 
     return f"Connection hiccup ({last_error or 'Missing API key in Streamlit Secrets'}). Check your Secrets tab and try again!"
 
@@ -539,7 +474,7 @@ if not st.session_state.messages:
             "role": "assistant",
             "is_greeting": True,
             "content": (
-                "Hey... welcome in. Take a breath, watch the pearl orb drift for a second, and turn on "
+                "Hey... welcome in. Take a breath, watch the waterfall cascade on the right, and turn on "
                 "some ocean waves or soft rain in the sidebar if you'd like. Whether you want to vent about "
                 "a heavy day, sort through something on your mind, or just want company—I'm right here. "
                 "How are you feeling right now?"
