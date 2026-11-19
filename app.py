@@ -7,6 +7,7 @@ from google import genai
 from google.genai import types
 import numpy as np
 import streamlit as st
+from lexi_identity import get_lexicare_identity
 from safety_shield import (
     check_safety_level,
     render_crisis_card,
@@ -235,6 +236,59 @@ def speak_text(text: str, mode: str, safety_level: str):
         pass
 
 
+# --- Dual-Brain AI Engine (Gemini Primary + Groq Failover with Identical Identity) ---
+def generate_lexi_reply(system_instruction: str, messages: list) -> str:
+    recent_messages = messages[-8:]
+
+    # 1. Primary Cloud: Google Gemini
+    gemini_key = st.secrets.get("GEMINI_API_KEY", "")
+    if gemini_key:
+        try:
+            client = genai.Client(api_key=gemini_key)
+            history_text = "\n".join(
+                f"{m['role'].upper()}: {m['content']}" for m in recent_messages
+            )
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=history_text,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    temperature=0.75,
+                ),
+            )
+            if response.text:
+                return response.text
+        except Exception:
+            pass  # Seamlessly fall through to Groq backup
+
+    # 2. Backup Cloud: Groq (Receives the exact same LEXI_CORE_IDENTITY)
+    groq_key = st.secrets.get("GROQ_API_KEY", "")
+    if groq_key:
+        try:
+            from groq import Groq
+
+            groq_client = Groq(api_key=groq_key)
+            groq_messages = [{"role": "system", "content": system_instruction}]
+            for m in recent_messages:
+                groq_messages.append({"role": m["role"], "content": m["content"]})
+
+            completion = groq_client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=groq_messages,
+                temperature=0.75,
+            )
+            reply_text = completion.choices[0].message.content
+            if reply_text:
+                return reply_text
+        except Exception:
+            pass
+
+    return (
+        "Hey, I'm still right here with you—my connection just blinked for a second. "
+        "Go ahead and send that one more time."
+    )
+
+
 # --- Sidebar: Ambient Soundscapes & Soothing Toolkit ---
 with st.sidebar:
     st.header("🎧 Calming Soundscapes")
@@ -258,133 +312,3 @@ with st.sidebar:
         ],
     )
     st.session_state.voice_enabled = st.toggle(
-        "Lexi Voice Replies (Ava • Unlimited)", value=True
-    )
-
-    st.divider()
-    st.subheader("🌬️ 60-Second Calm Reset")
-    if st.button("Start Guided Breathing", use_container_width=True):
-        placeholder = st.empty()
-        steps = [
-            ("Breathe IN slowly through your nose...", 4),
-            ("HOLD gently...", 4),
-            ("Breathe OUT slowly through your mouth...", 6),
-        ]
-        for _ in range(3):
-            for label, secs in steps:
-                for s in range(secs, 0, -1):
-                    placeholder.info(f"**{label}** ({s}s)")
-                    time.sleep(1)
-        placeholder.success("Nice job. Notice how your shoulders feel right now.")
-
-    st.divider()
-    st.subheader("🗑️ Brain Dump Shredder")
-    worry = st.text_area(
-        "Type a stress or thought you want to let go of:",
-        placeholder="Write it here, then shred it...",
-        height=80,
-    )
-    if st.button("Shred This Thought", use_container_width=True):
-        if worry.strip():
-            st.toast("Shredded and cleared from your space. 🍃")
-            st.rerun()
-
-    st.divider()
-    if st.button("Clear Chat History", use_container_width=True):
-        st.session_state.messages = []
-        st.rerun()
-
-# --- Starter Greeting ---
-if not st.session_state.messages:
-    st.session_state.messages.append(
-        {
-            "role": "assistant",
-            "content": (
-                "Hey... I'm Lexi. Take a second, settle in, and turn on some rain or ocean waves "
-                "in the sidebar if you want. Whether you need to vent about a rough day, sort through "
-                "something on your mind, or just want company—I'm right here. What's going on today?"
-            ),
-        }
-    )
-
-# --- Display Chat History ---
-for msg in st.session_state.messages:
-    avatar = "🌿" if msg["role"] == "assistant" else "🧑"
-    with st.chat_message(msg["role"], avatar=avatar):
-        st.write(msg["content"])
-
-# --- Quick Mood Prompts ---
-# --- Quick Mood Prompts ---
-st.caption("Need a starting point? Tap one:")
-q1, q2, q3 = st.columns(3)
-quick_prompt = None
-if q1.button("😔 I'm feeling overwhelmed", use_container_width=True):
-    quick_prompt = "I'm feeling really overwhelmed right now and just need someone to talk to."
-if q2.button("🌙 Can't sleep / lonely", use_container_width=True):
-    quick_prompt = "I'm up late feeling lonely and my brain won't turn off."
-if q3.button("🎲 Play a calming game", use_container_width=True):
-    quick_prompt = "Can we play a fun, low-stress mini-game right here in chat to distract me?"
-
-# --- Chat Input & AI Engine ---
-user_input = st.chat_input("Tell Lexi anything...")
-prompt = quick_prompt or user_input
-
-if prompt:
-    safety_level = check_safety_level(prompt)
-
-    if safety_level == "CRISIS":
-        st.session_state.crisis_locked = True
-        st.rerun()
-
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar="🧑"):
-        st.write(prompt)
-
-    if safety_level == "DISTRESS":
-        render_distress_grounding()
-
-    system_instruction = f"""
-    You are Lexi, the warm, empathetic AI companion inside LexiCare (Powered by LexiTech).
-    Current user mode: {st.session_state.chat_mode}.
-    Safety level detected: {safety_level}.
-
-    Voice & Cadence Rules (CRITICAL—your words are spoken aloud):
-    - Talk like a real, caring human friend—never like an AI assistant, customer support bot, or textbook.
-    - Use natural contractions (I'm, you're, that's, don't) and gentle pauses with ellipses (...) or em-dashes (—) where a human would take a breath.
-    - NEVER use bullet points, numbered lists, or bold headers in normal conversation—speak in smooth, natural paragraphs.
-    - Keep replies concise (2 to 3 short paragraphs) so the conversation flows back and forth naturally.
-    - If mode is 'Just Listen (Vent)', lead with genuine sympathy, validate how they feel, and ask one soft follow-up question without jumping into unsolicited fixes.
-    - If mode is 'Help Me Problem-Solve', gently walk through one small, doable next step together.
-    - If mode is 'Distract Me / Play a Game', immediately jump into a cozy, low-pressure game (like Would You Rather, 20 Questions, or a relaxing choose-your-own-adventure).
-    - If Safety level is 'DISTRESS', keep sentences extra short, grounded, and soothing.
-    - Never claim to be a human, doctor, or licensed therapist.
-    """
-
-    with st.chat_message("assistant", avatar="🌿"):
-        with st.spinner("Lexi is listening..."):
-            try:
-                client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
-                history_text = "\n".join(
-                    f"{m['role'].upper()}: {m['content']}"
-                    for m in st.session_state.messages[-8:]
-                )
-                response = client.models.generate_content(
-                    model="gemini-2.5-flash",
-                    contents=history_text,
-                    config=types.GenerateContentConfig(
-                        system_instruction=system_instruction,
-                        temperature=0.75,
-                    ),
-                )
-                reply = response.text
-            except Exception:
-                reply = (
-                    "Hey, I'm still right here with you—my connection just blinked for a second. "
-                    "Go ahead and send that one more time."
-                )
-
-            st.write(reply)
-            st.session_state.messages.append({"role": "assistant", "content": reply})
-
-            if st.session_state.voice_enabled:
-                speak_text(reply, st.session_state.chat_mode, safety_level)
