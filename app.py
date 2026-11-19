@@ -238,8 +238,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-
 @st.cache_data(show_spinner=False)
 def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
     sample_rate = 22050
@@ -294,6 +292,7 @@ st.markdown(
 )
 
 components.html(
+    """
     <div style="width:100%; height:140px; border-radius:20px; overflow:hidden; position:relative;
                 background: radial-gradient(circle at 50% 50%, rgba(36, 128, 126, 0.28), rgba(6, 22, 28, 0.85));
                 border: 1px solid rgba(226, 194, 144, 0.28); box-shadow: inset 0 0 30px rgba(0,0,0,0.45);">
@@ -305,6 +304,122 @@ components.html(
     </div>
     <script>
     const canvas = document.getElementById('orbCanvas');
+    const ctx = canvas.getContext('2d');
+    let w, h, dpr;
+    function resize() {
+        dpr = window.devicePixelRatio || 1;
+        w = canvas.clientWidth;
+        h = canvas.clientHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.scale(dpr, dpr);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let mouse = { x: w * 0.5, y: h * 0.5, active: false };
+    let orb = { x: w * 0.5, y: h * 0.5, vx: 0, vy: 0 };
+
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+        mouse.active = true;
+    });
+    canvas.addEventListener('mouseleave', () => { mouse.active = false; });
+
+    const motes = Array.from({ length: 26 }, (_, i) => ({
+        angle: (i / 26) * Math.PI * 2,
+        radius: 34 + (i % 5) * 14,
+        speed: 0.004 + (i % 4) * 0.002,
+        size: 1.5 + (i % 3) * 1.1,
+        zOffset: (i % 7) * 0.4
+    }));
+
+    let tick = 0;
+    function animate() {
+        tick += 0.025;
+        ctx.clearRect(0, 0, w, h);
+
+        const targetX = mouse.active ? mouse.x : (w * 0.5 + Math.cos(tick * 0.6) * 55);
+        const targetY = mouse.active ? mouse.y : (h * 0.5 + Math.sin(tick * 0.8) * 16);
+
+        orb.vx += (targetX - orb.x) * 0.035;
+        orb.vy += (targetY - orb.y) * 0.035;
+        orb.vx *= 0.86;
+        orb.vy *= 0.86;
+        orb.x += orb.vx;
+        orb.y += orb.vy;
+
+        const breath = 46 + Math.sin(tick * 1.2) * 6;
+        const halo = ctx.createRadialGradient(orb.x, orb.y, 4, orb.x, orb.y, breath * 1.85);
+        halo.addColorStop(0, 'rgba(158, 240, 224, 0.45)');
+        halo.addColorStop(0.45, 'rgba(226, 194, 144, 0.16)');
+        halo.addColorStop(1, 'rgba(10, 35, 42, 0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, breath * 1.85, 0, Math.PI * 2);
+        ctx.fill();
+
+        motes.forEach(m => {
+            m.angle += m.speed;
+            const depth = Math.sin(m.angle + m.zOffset);
+            const mx = orb.x + Math.cos(m.angle) * (m.radius * 1.45);
+            const my = orb.y + depth * (m.radius * 0.42);
+            const scale = 0.65 + (depth + 1) * 0.35;
+            ctx.fillStyle = depth > 0 ? 'rgba(245, 228, 196, 0.82)' : 'rgba(126, 224, 210, 0.42)';
+            ctx.beginPath();
+            ctx.arc(mx, my, m.size * scale, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        const sphereGrad = ctx.createRadialGradient(
+            orb.x - 10, orb.y - 10, 3,
+            orb.x, orb.y, breath * 0.72
+        );
+        sphereGrad.addColorStop(0, '#ffffff');
+        sphereGrad.addColorStop(0.35, '#bff3e8');
+        sphereGrad.addColorStop(0.75, '#3aa89e');
+        sphereGrad.addColorStop(1, 'rgba(18, 72, 76, 0.25)');
+        ctx.fillStyle = sphereGrad;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, breath * 0.72, 0, Math.PI * 2);
+        ctx.fill();
+
+        requestAnimationFrame(animate);
+    }
+    animate();
+    </script>
+    """,
+    height=150,
+)
+
+render_safety_header()
+
+if st.session_state.get("crisis_locked", False):
+    render_crisis_card()
+    st.stop()
+
+if not st.session_state.accepted_terms:
+    with st.container(border=True):
+        st.subheader("Take a slow breath. Welcome to your sanctuary.")
+        st.write(
+            "LexiCare is a peaceful, judgment-free retreat to talk through your day, "
+            "unwind to ocean waves or rain, and reset whenever life feels heavy."
+        )
+        st.info(
+            "**Before stepping inside, please confirm:**\n"
+            "- Lexi is an AI companion—not a licensed therapist, doctor, or counselor.\n"
+            "- Lexi cannot diagnose conditions or automatically call 911 for you.\n"
+            "- If you are ever in immediate danger, tap **Human Support** at the top or call **988** / **911**."
+        )
+        agreed = st.checkbox(
+            "I understand that LexiCare is an AI wellness companion and not medical or therapy care."
+        )
+        if st.button("Enter Sanctuary", type="primary", disabled=not agreed):
+            st.session_state.accepted_terms = True
+            st.rerun()
+    st.stop()
 async def _generate_free_voice(text: str, output_path: str, rate: str, pitch: str):
     communicate = edge_tts.Communicate(
         text,
