@@ -1,1 +1,4 @@
-safety_shield.py
+streamlit
+google-genai
+edge-tts
+numpy
