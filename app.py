@@ -7,6 +7,7 @@ from google import genai
 from google.genai import types
 import numpy as np
 import streamlit as st
+import streamlit.components.v1 as components
 from lexi_identity import get_lexicare_identity
 from safety_shield import (
     check_safety_level,
@@ -29,175 +30,143 @@ if "voice_enabled" not in st.session_state:
     st.session_state.voice_enabled = True
 if "chat_mode" not in st.session_state:
     st.session_state.chat_mode = "Just Listen (Vent)"
-if "ambient_scene" not in st.session_state:
-    st.session_state.ambient_scene = "Ocean Waves"
-
-# --- Luxury Cancun / Hawaii Twilight Spa Theme & Animated Backdrop ---
 st.markdown(
     """
     <style>
-    @keyframes oceanTide {
+    @import url('https://googleapis.com');
+
+    @keyframes sanctuaryTide {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
     }
 
-    @keyframes rainFall {
-        0% { background-position: 0 0; }
-        100% { background-position: -60px 600px; }
-    }
-
-    @keyframes waveRise {
-        0%, 100% { transform: translateY(0px) scaleY(1); opacity: 0.35; }
-        50% { transform: translateY(-18px) scaleY(1.06); opacity: 0.6; }
-    }
-
-    /* Deep Twilight Tropical Ocean Base */
     .stApp {
-        background: linear-gradient(-45deg, #07191e, #0d2e36, #113c42, #092229);
-        background-size: 300% 300%;
-        animation: oceanTide 18s ease infinite;
-        color: #f3f7f5 !important;
+        background: radial-gradient(circle at 18% 15%, #13444b 0%, #09242b 45%, #051419 100%);
+        background-size: 200% 200%;
+        animation: sanctuaryTide 24s ease infinite;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        color: #f4f7f5 !important;
     }
 
-    /* Animated Ambient Overlay (Waves & Gentle Rain Shimmer) */
-    .stApp::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        background-image:
-            radial-gradient(ellipse at 20% 85%, rgba(45, 168, 158, 0.22) 0%, transparent 55%),
-            radial-gradient(ellipse at 80% 20%, rgba(212, 175, 118, 0.12) 0%, transparent 50%),
-            repeating-linear-gradient(
-                105deg,
-                rgba(255, 255, 255, 0.0) 0px,
-                rgba(255, 255, 255, 0.0) 28px,
-                rgba(165, 225, 220, 0.045) 29px,
-                rgba(255, 255, 255, 0.0) 30px
-            );
-        background-size: 100% 100%, 100% 100%, 240px 600px;
-        animation: rainFall 14s linear infinite;
-    }
-
-    /* Force High-Contrast Ivory Typography Across Every Streamlit Element */
     .stApp p, .stApp span, .stApp label, .stApp li, .stApp div,
     .stMarkdown, .stCaption, [data-testid="stCaptionContainer"] {
-        color: #eef5f2 !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        color: #edf4f1 !important;
+        letter-spacing: 0.01em;
     }
 
-    .stApp h1, .stApp h2, .stApp h3, .stApp h4 {
+    .stApp h1, .stApp h2, .stApp h3 {
+        font-family: 'Cormorant Garamond', Georgia, serif !important;
         color: #ffffff !important;
-        font-weight: 600;
+        letter-spacing: 0.02em;
     }
 
     [data-testid="stHeader"] {
-        background: rgba(7, 25, 30, 0.45) !important;
-        backdrop-filter: blur(10px);
+        background: rgba(5, 20, 25, 0.35) !important;
+        backdrop-filter: blur(12px);
     }
 
-    /* Luxury Spa Frosted Dark-Teal Sidebar */
     [data-testid="stSidebar"] {
-        background: rgba(8, 28, 34, 0.88) !important;
-        backdrop-filter: blur(18px);
-        border-right: 1px solid rgba(114, 196, 184, 0.22);
+        background: linear-gradient(180deg, rgba(8, 29, 36, 0.92), rgba(5, 19, 24, 0.96)) !important;
+        backdrop-filter: blur(22px);
+        border-right: 1px solid rgba(226, 194, 144, 0.22);
     }
 
-    /* Hero Spa Banner */
     .lexi-hero {
         position: relative;
-        z-index: 1;
-        background: linear-gradient(135deg, rgba(14, 46, 54, 0.86), rgba(9, 31, 38, 0.92));
-        backdrop-filter: blur(18px);
-        border: 1px solid rgba(124, 206, 192, 0.32);
-        border-radius: 22px;
-        padding: 1.5rem 1.75rem;
+        background: linear-gradient(145deg, rgba(16, 52, 60, 0.78), rgba(8, 28, 35, 0.88));
+        backdrop-filter: blur(22px);
+        border: 1px solid rgba(226, 194, 144, 0.32);
+        border-radius: 26px;
+        padding: 1.8rem 2rem;
         text-align: center;
-        margin-bottom: 1.1rem;
-        box-shadow: 0 14px 38px rgba(0, 0, 0, 0.35);
+        margin-bottom: 1.25rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
 
     .lexi-hero h1 {
         margin: 0;
-        font-size: 2.25rem;
-        letter-spacing: -0.02em;
-        color: #ffffff !important;
+        font-family: 'Cormorant Garamond', Georgia, serif !important;
+        font-size: 2.85rem !important;
+        font-weight: 600 !important;
+        background: linear-gradient(90deg, #ffffff, #e8d5b5, #b9efe4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
     .lexi-badge {
         display: inline-block;
-        margin-top: 0.45rem;
-        padding: 0.25rem 0.85rem;
+        margin-top: 0.5rem;
+        padding: 0.3rem 1.05rem;
         border-radius: 999px;
-        background: rgba(86, 186, 172, 0.16);
-        border: 1px solid rgba(124, 206, 192, 0.35);
-        color: #b8ece3 !important;
-        font-size: 0.84rem;
-        letter-spacing: 0.04em;
+        background: rgba(226, 194, 144, 0.12);
+        border: 1px solid rgba(226, 194, 144, 0.38);
+        color: #f0dec0 !important;
+        font-size: 0.78rem !important;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
     }
 
-    /* Chat Message Frosted Cards */
     [data-testid="stChatMessage"] {
-        background: rgba(12, 40, 48, 0.84) !important;
-        backdrop-filter: blur(14px);
-        border: 1px solid rgba(124, 206, 192, 0.24);
-        border-radius: 18px;
-        padding: 1rem 1.2rem;
-        margin-bottom: 0.75rem;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        background: linear-gradient(145deg, rgba(14, 46, 55, 0.82), rgba(9, 32, 39, 0.88)) !important;
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(132, 212, 198, 0.22);
+        border-radius: 20px;
+        padding: 1.15rem 1.35rem;
+        margin-bottom: 0.85rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+        line-height: 1.65;
     }
 
-    /* Containers & Expanders */
     [data-testid="stVerticalBlockBorderWrapper"],
     [data-testid="stExpander"] {
-        background: rgba(11, 37, 44, 0.85) !important;
-        border: 1px solid rgba(124, 206, 192, 0.25) !important;
-        border-radius: 16px !important;
+        background: rgba(10, 35, 42, 0.85) !important;
+        border: 1px solid rgba(226, 194, 144, 0.26) !important;
+        border-radius: 18px !important;
     }
 
-    /* Buttons (Warm Seafoam & Champagne Gold Accents) */
     .stButton > button {
-        border-radius: 12px !important;
-        border: 1px solid rgba(124, 206, 192, 0.38) !important;
-        background: rgba(18, 58, 68, 0.85) !important;
-        color: #f3f7f5 !important;
+        border-radius: 14px !important;
+        border: 1px solid rgba(226, 194, 144, 0.34) !important;
+        background: rgba(16, 54, 64, 0.82) !important;
+        color: #f6f8f7 !important;
         font-weight: 500 !important;
-        transition: all 0.22s ease;
+        padding: 0.55rem 1rem !important;
+        transition: all 0.25s ease;
     }
 
     .stButton > button:hover {
-        background: rgba(42, 118, 122, 0.92) !important;
-        border-color: #9fe3d8 !important;
+        background: linear-gradient(135deg, rgba(44, 126, 124, 0.9), rgba(26, 86, 92, 0.95)) !important;
+        border-color: #ebd3aa !important;
         color: #ffffff !important;
+        box-shadow: 0 6px 20px rgba(84, 196, 182, 0.22);
         transform: translateY(-1px);
     }
 
     .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #2b8a82, #1f6b69) !important;
-        border: 1px solid #8ce0d2 !important;
+        background: linear-gradient(135deg, #2d8f85, #1c6564) !important;
+        border: 1px solid #ebd3aa !important;
         color: #ffffff !important;
     }
 
-    /* Text Inputs, Text Areas & Chat Box */
     textarea, input, [data-testid="stChatInput"] textarea {
-        background-color: rgba(8, 28, 34, 0.92) !important;
-        color: #f4f8f6 !important;
-        border: 1px solid rgba(124, 206, 192, 0.35) !important;
-        border-radius: 12px !important;
+        background-color: rgba(7, 25, 31, 0.92) !important;
+        color: #f5f9f7 !important;
+        border: 1px solid rgba(226, 194, 144, 0.35) !important;
+        border-radius: 14px !important;
     }
 
     [data-baseweb="select"] > div {
-        background-color: rgba(8, 28, 34, 0.92) !important;
-        color: #f4f8f6 !important;
-        border-color: rgba(124, 206, 192, 0.35) !important;
+        background-color: rgba(7, 25, 31, 0.92) !important;
+        color: #f5f9f7 !important;
+        border-color: rgba(226, 194, 144, 0.35) !important;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
-
-
 @st.cache_data(show_spinner=False)
 def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
     sample_rate = 22050
@@ -245,10 +214,113 @@ st.markdown(
     """
     <div class="lexi-hero">
         <h1>🌺 LexiCare</h1>
-        <div class="lexi-badge">POWERED BY LEXITECH • 24/7 SANCTUARY & AI COMPANION</div>
+        <div class="lexi-badge">Powered by LexiTech • Private Sanctuary &amp; AI Companion</div>
     </div>
     """,
     unsafe_allow_html=True,
+)
+
+components.html(
+    """
+    <div style="width:100%; height:145px; border-radius:20px; overflow:hidden; position:relative;
+                background: radial-gradient(circle at 50% 50%, rgba(36, 128, 126, 0.28), rgba(6, 22, 28, 0.85));
+                border: 1px solid rgba(226, 194, 144, 0.26); box-shadow: inset 0 0 30px rgba(0,0,0,0.45);">
+        <canvas id="orbCanvas" style="width:100%; height:100%; display:block; cursor:grab;"></canvas>
+        <div style="position:absolute; bottom:10px; right:14px; font-family:'Plus Jakarta Sans',sans-serif;
+                    font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(240,222,192,0.72); pointer-events:none;">
+            Move cursor to guide the sanctuary orb
+        </div>
+    </div>
+    <script>
+    const canvas = document.getElementById('orbCanvas');
+    const ctx = canvas.getContext('2d');
+    let w, h, dpr;
+    function resize() {
+        dpr = window.devicePixelRatio || 1;
+        w = canvas.clientWidth;
+        h = canvas.clientHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.scale(dpr, dpr);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let mouse = { x: w * 0.5, y: h * 0.5, active: false };
+    let orb = { x: w * 0.5, y: h * 0.5, vx: 0, vy: 0 };
+
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+        mouse.active = true;
+    });
+    canvas.addEventListener('mouseleave', () => { mouse.active = false; });
+
+    const motes = Array.from({ length: 26 }, (_, i) => ({
+        angle: (i / 26) * Math.PI * 2,
+        radius: 34 + (i % 5) * 14,
+        speed: 0.004 + (i % 4) * 0.002,
+        size: 1.5 + (i % 3) * 1.1,
+        zOffset: (i % 7) * 0.4
+    }));
+
+    let tick = 0;
+    function animate() {
+        tick += 0.025;
+        ctx.clearRect(0, 0, w, h);
+
+        const targetX = mouse.active ? mouse.x : (w * 0.5 + Math.cos(tick * 0.6) * 55);
+        const targetY = mouse.active ? mouse.y : (h * 0.5 + Math.sin(tick * 0.8) * 16);
+
+        orb.vx += (targetX - orb.x) * 0.035;
+        orb.vy += (targetY - orb.y) * 0.035;
+        orb.vx *= 0.86;
+        orb.vy *= 0.86;
+        orb.x += orb.vx;
+        orb.y += orb.vy;
+
+        const breath = 46 + Math.sin(tick * 1.2) * 6;
+        const halo = ctx.createRadialGradient(orb.x, orb.y, 4, orb.x, orb.y, breath * 1.85);
+        halo.addColorStop(0, 'rgba(158, 240, 224, 0.45)');
+        halo.addColorStop(0.45, 'rgba(226, 194, 144, 0.16)');
+        halo.addColorStop(1, 'rgba(10, 35, 42, 0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, breath * 1.85, 0, Math.PI * 2);
+        ctx.fill();
+
+        motes.forEach(m => {
+            m.angle += m.speed;
+            const depth = Math.sin(m.angle + m.zOffset);
+            const mx = orb.x + Math.cos(m.angle) * (m.radius * 1.45);
+            const my = orb.y + depth * (m.radius * 0.42);
+            const scale = 0.65 + (depth + 1) * 0.35;
+            ctx.fillStyle = depth > 0 ? 'rgba(245, 228, 196, 0.82)' : 'rgba(126, 224, 210, 0.42)';
+            ctx.beginPath();
+            ctx.arc(mx, my, m.size * scale, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        const sphereGrad = ctx.createRadialGradient(
+            orb.x - 10, orb.y - 10, 3,
+            orb.x, orb.y, breath * 0.72
+        );
+        sphereGrad.addColorStop(0, '#ffffff');
+        sphereGrad.addColorStop(0.35, '#bff3e8');
+        sphereGrad.addColorStop(0.75, '#3aa89e');
+        sphereGrad.addColorStop(1, 'rgba(18, 72, 76, 0.25)');
+        ctx.fillStyle = sphereGrad;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, breath * 0.72, 0, Math.PI * 2);
+        ctx.fill();
+
+        requestAnimationFrame(animate);
+    }
+    animate();
+    </script>
+    """,
+    height=155,
 )
 
 render_safety_header()
@@ -344,7 +416,7 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
                 messages=groq_messages,
                 temperature=0.75,
             )
-            reply_text = completion.choices[0].message.content
+            reply_text = completion.choices.message.content
             if reply_text:
                 return reply_text
         except Exception:
@@ -419,9 +491,10 @@ if not st.session_state.messages:
         {
             "role": "assistant",
             "content": (
-                "Hey... welcome in. Take a breath, settle into the quiet, and turn on some ocean waves "
-                "or soft rain in the sidebar if you'd like. Whether you want to vent about a heavy day, "
-                "sort through something on your mind, or just want company—I'm right here. How are you feeling right now?"
+                "Hey... welcome in. Take a breath, watch the pearl orb drift for a second, and turn on "
+                "some ocean waves or soft rain in the sidebar if you'd like. Whether you want to vent about "
+                "a heavy day, sort through something on your mind, or just want company—I'm right here. "
+                "How are you feeling right now?"
             ),
         }
     )
@@ -468,22 +541,3 @@ if prompt:
 
             if st.session_state.voice_enabled:
                 speak_text(reply, st.session_state.chat_mode, safety_level)
-
-# --- Live Animated Ocean Tide Floor ---
-st.markdown(
-    """
-    <div style="position: fixed; bottom: 0; left: 0; width: 100%; height: 95px; pointer-events: none; z-index: 0; overflow: hidden; opacity: 0.45;">
-        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" style="width: 200%; height: 100%; animation: tideSlide 16s linear infinite;">
-            <path d="M0,45 C360,110 720,-15 1080,55 C1260,90 1350,70 1440,45 L1440,120 L0,120 Z" fill="rgba(56, 178, 172, 0.35)"></path>
-            <path d="M0,70 C320,10 680,115 1040,55 C1240,25 1360,65 1440,70 L1440,120 L0,120 Z" fill="rgba(129, 230, 217, 0.22)"></path>
-        </svg>
-    </div>
-    <style>
-    @keyframes tideSlide {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
