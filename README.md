@@ -1,4 +1,8 @@
-# 🌿 LexiCare (Powered by LexiTech)
+<p align="center">
+  <img src="lexicare-banner.png" alt="LexiCare — Reflect • Reset • Thrive by LexiTech" width="100%">
+</p>
+
+ 🌿 LexiCare (Powered by LexiTech)
 
 **Your 24/7 Safe Space, Ambient Retreat & AI Companion**
 
