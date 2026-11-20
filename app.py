@@ -125,6 +125,9 @@ PAGE_STYLE = (
     '}'
     '@keyframes fallSlow { 0% { transform: translateY(0); } 100% { transform: translateY(240px); } }'
     '@keyframes fallFast { 0% { transform: translateY(0); } 100% { transform: translateY(180px); } }'
+)
+PAGE_STYLE_2 = (
+    '<style>'
     '.spa-mist {'
     '  position: fixed; bottom: 0; right: 0; width: 310px; height: 130px; z-index: 1; pointer-events: none;'
     '  background: radial-gradient(ellipse at 82% 100%, rgba(235, 255, 252, 0.50) 0%, rgba(168, 245, 230, 0.18) 52%, transparent 78%);'
@@ -212,6 +215,29 @@ PAGE_STYLE = (
     '@keyframes sidebarMoteRise {'
     '  0% { transform: translateY(0px) translateX(0px); opacity: 0; }'
     '  15% { opacity: 0.85; }'
+    '  85% { opacity: 0.75; }'
+    '  100% { transform: translateY(-102vh) translateX(14px); opacity: 0; }'
+    '}'
+    '.sidebar-lotus-card {'
+    '  background: linear-gradient(145deg, rgba(246, 227, 197, 0.16), rgba(168, 245, 230, 0.10));'
+    '  border: 1px solid rgba(246, 227, 197, 0.42); border-radius: 18px;'
+    '  padding: 1rem 0.9rem; text-align: center; margin-bottom: 1rem;'
+    '  box-shadow: 0 8px 24px rgba(4, 24, 30, 0.25);'
+    '}'
+    '</style>'
+    '<svg class="golden-lotus lotus-1" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/></svg>'
+    '<svg class="golden-lotus lotus-2" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>'
+    '<svg class="golden-lotus lotus-3" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/></svg>'
+    '<svg class="golden-lotus lotus-4" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>'
+    '<svg class="golden-lotus lotus-5" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/></svg>'
+    '<svg class="golden-lotus lotus-6" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>'
+    '<div class="spa-waterfall"><div class="spa-wf-stream1"></div><div class="spa-wf-stream2"></div></div>'
+    '<div class="spa-mist"></div>'
+    '<svg class="lagoon-wave" viewBox="0 0 1440 160" preserveAspectRatio="none">'
+    '<path d="M0,75 C360,145 720,5 1080,85 C1260,120 1350,95 1440,75 L1440,160 L0,160 Z" fill="rgba(45, 175, 168, 0.24)"></path>'
+    '</svg>'
+)
+st.markdown(PAGE_STYLE + PAGE_STYLE_2, unsafe_allow_html=True)
 @st.cache_data(show_spinner=False)
 def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
     sample_rate = 22050
