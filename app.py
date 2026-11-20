@@ -36,24 +36,20 @@ st.markdown(
     <style>
     @import url('https://googleapis.com');
 
-    /* Rich, Deep Cancun/Hawaii Twilight Lagoon Base (Zero Washed-Out Fade) */
     .stApp {
-        background: linear-gradient(160deg, #041318 0%, #092b34 45%, #0d3b44 80%, #05181e 100%) !important;
-        color: #ffffff !important;
+        background: radial-gradient(circle at 20% 10%, #144d56 0%, #08232a 52%, #041216 100%) !important;
+        color: #f3f7f5 !important;
     }
 
-    /* Keep ALL Content Cards & Chat Boxes Strictly ON TOP of Waterfall & Flowers */
-    [data-testid="stAppViewContainer"] > .main,
-    [data-testid="stMainBlockContainer"],
-    .block-container {
+    [data-testid="stAppViewContainer"], .main, .block-container {
         background: transparent !important;
-        position: relative !important;
-        z-index: 10 !important;
+        position: relative;
+        z-index: 2;
     }
 
     p, label, li, .stMarkdown, input, textarea {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        color: #f4f8f6 !important;
+        color: #eef5f2 !important;
     }
 
     h1, h2, h3 {
@@ -62,32 +58,31 @@ st.markdown(
     }
 
     [data-testid="stHeader"] {
-        background: rgba(4, 19, 24, 0.55) !important;
-        backdrop-filter: blur(12px);
-        z-index: 20 !important;
+        background: rgba(4, 19, 23, 0.45) !important;
+        backdrop-filter: blur(10px);
     }
 
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #051b22 0%, #082730 100%) !important;
-        border-right: 1px solid rgba(235, 213, 179, 0.28);
-        z-index: 25 !important;
+        background: rgba(6, 25, 31, 0.92) !important;
+        backdrop-filter: blur(18px);
+        border-right: 1px solid rgba(226, 194, 144, 0.24);
     }
 
-    /* Hero Sanctuary Card */
     .lexi-hero {
-        background: linear-gradient(145deg, rgba(11, 45, 54, 0.92), rgba(5, 23, 29, 0.96));
-        border: 1px solid rgba(235, 213, 179, 0.42);
+        background: linear-gradient(145deg, rgba(16, 54, 62, 0.82), rgba(7, 26, 33, 0.90));
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(226, 194, 144, 0.35);
         border-radius: 24px;
         padding: 1.6rem 1.8rem;
         text-align: center;
         margin-bottom: 1rem;
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.48);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.4);
     }
 
     .lexi-hero h1 {
         margin: 0;
-        font-size: 2.8rem !important;
-        background: linear-gradient(90deg, #ffffff, #f2dec0, #9ef0e0);
+        font-size: 2.75rem !important;
+        background: linear-gradient(90deg, #ffffff, #ebd5b3, #b4f0e4);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
@@ -97,92 +92,99 @@ st.markdown(
         margin-top: 0.45rem;
         padding: 0.28rem 1rem;
         border-radius: 999px;
-        background: rgba(235, 213, 179, 0.16);
-        border: 1px solid rgba(235, 213, 179, 0.45);
-        color: #f7e6c8 !important;
+        background: rgba(226, 194, 144, 0.14);
+        border: 1px solid rgba(226, 194, 144, 0.4);
+        color: #f2dfc1 !important;
         font-size: 0.76rem;
         letter-spacing: 0.12em;
         text-transform: uppercase;
     }
 
-    /* Rich Frosted Chat Bubbles */
     [data-testid="stChatMessage"] {
-        background: rgba(8, 34, 42, 0.92) !important;
-        border: 1px solid rgba(132, 212, 198, 0.34);
+        background: rgba(11, 40, 48, 0.86) !important;
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(132, 212, 198, 0.26);
         border-radius: 18px;
         padding: 1.1rem 1.3rem;
         margin-bottom: 0.8rem;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.36);
+        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.28);
     }
 
     [data-testid="stVerticalBlockBorderWrapper"],
     [data-testid="stExpander"] {
-        background: rgba(7, 29, 36, 0.92) !important;
-        border: 1px solid rgba(235, 213, 179, 0.32) !important;
+        background: rgba(9, 32, 39, 0.88) !important;
+        border: 1px solid rgba(226, 194, 144, 0.28) !important;
         border-radius: 16px !important;
     }
 
     .stButton > button {
         border-radius: 12px !important;
-        border: 1px solid rgba(235, 213, 179, 0.42) !important;
-        background: rgba(12, 48, 58, 0.94) !important;
-        color: #ffffff !important;
+        border: 1px solid rgba(226, 194, 144, 0.38) !important;
+        background: rgba(15, 52, 62, 0.88) !important;
+        color: #f6f8f7 !important;
         transition: all 0.22s ease;
     }
 
     .stButton > button:hover {
-        background: rgba(34, 118, 120, 0.98) !important;
-        border-color: #f7e6c8 !important;
+        background: rgba(38, 114, 116, 0.95) !important;
+        border-color: #ebd3aa !important;
         color: #ffffff !important;
     }
 
     .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #289488, #196664) !important;
-        border: 1px solid #f7e6c8 !important;
+        background: linear-gradient(135deg, #2b8c82, #1b6362) !important;
+        border: 1px solid #ebd3aa !important;
     }
 
     textarea, input, [data-testid="stChatInput"] textarea {
-        background-color: rgba(5, 20, 26, 0.96) !important;
-        color: #ffffff !important;
-        border: 1px solid rgba(235, 213, 179, 0.42) !important;
+        background-color: rgba(6, 23, 29, 0.94) !important;
+        color: #f5f9f7 !important;
+        border: 1px solid rgba(226, 194, 144, 0.38) !important;
         border-radius: 14px !important;
     }
 
-    /* Background Sanctuary Layer (Strictly BEHIND All Boxes) */
     .sanctuary-water {
         position: fixed;
         inset: 0;
         pointer-events: none;
-        z-index: 0 !important;
+        z-index: 1;
         overflow: hidden;
     }
 
-    .lotus-flower {
+    .sanctuary-pattern {
         position: absolute;
-        opacity: 0.32;
-        filter: drop-shadow(0 0 14px rgba(235, 213, 179, 0.35));
-        animation: lotusDrift 18s ease-in-out infinite alternate;
+        inset: -10%;
+        opacity: 0.085;
+        background-image: url("data:image/svg+xml,%3Csvg width='160' height='160' viewBox='0 0 160 160' xmlns='http://w3.org fill='none' stroke='%23e8d5b5' stroke-width='0.9'%3E%3Ccircle cx='80' cy='80' r='58'/%3E%3Ccircle cx='80' cy='80' r='38'/%3E%3Cpath d='M80 22 C96 48 96 68 80 80 C64 68 64 48 80 22 Z'/%3E%3Cpath d='M80 138 C96 112 96 92 80 80 C64 92 64 112 80 138 Z'/%3E%3Cpath d='M22 80 C48 64 68 64 80 80 C68 96 48 96 22 80 Z'/%3E%3Cpath d='M138 80 C112 64 92 64 80 80 C92 96 112 96 138 80 Z'/%3E%3Cpath d='M39 39 C64 48 74 58 80 80 C58 74 48 64 39 39 Z'/%3E%3Cpath d='M121 121 C96 112 86 102 80 80 C102 86 112 96 121 121 Z'/%3E%3Cpath d='M121 39 C112 64 102 74 80 80 C86 58 96 48 121 39 Z'/%3E%3Cpath d='M39 121 C48 96 58 86 80 80 C74 102 64 112 39 121 Z'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: 160px 160px;
+        animation: patternFloat 48s linear infinite;
     }
 
-    .lotus-1 { top: 8%; left: 3%; width: 175px; animation-duration: 16s; }
-    .lotus-2 { top: 46%; left: 2%; width: 225px; opacity: 0.26; animation-duration: 21s; }
-    .lotus-3 { bottom: 10%; left: 7%; width: 155px; animation-duration: 19s; }
-    .lotus-4 { top: 16%; right: 14%; width: 165px; opacity: 0.25; animation-duration: 23s; }
+    .sanctuary-bokeh {
+        position: absolute;
+        inset: 0;
+        background-image:
+            radial-gradient(circle at 14% 28%, rgba(235, 213, 179, 0.14) 0px, transparent 95px),
+            radial-gradient(circle at 22% 68%, rgba(126, 224, 210, 0.14) 0px, transparent 120px),
+            radial-gradient(circle at 76% 22%, rgba(235, 213, 179, 0.11) 0px, transparent 110px),
+            radial-gradient(circle at 48% 52%, rgba(72, 188, 178, 0.09) 0px, transparent 180px);
+        animation: bokehBreathe 11s ease-in-out infinite alternate;
+    }
 
     .waterfall-column {
         position: absolute;
         top: 0;
-        right: 0;
-        width: 145px;
+        right: 3%;
+        width: 190px;
         height: 100vh;
         background: linear-gradient(
             180deg,
-            rgba(180, 245, 238, 0.05) 0%,
-            rgba(130, 232, 224, 0.24) 45%,
-            rgba(195, 250, 244, 0.42) 100%
+            rgba(180, 245, 238, 0.02) 0%,
+            rgba(130, 232, 224, 0.16) 45%,
+            rgba(195, 250, 244, 0.32) 100%
         );
-        mask-image: linear-gradient(90deg, transparent 0%, black 35%, black 100%);
-        -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 35%, black 100%);
+        mask-image: linear-gradient(90deg, transparent 0%, black 22%, black 78%, transparent 100%);
+        -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 22%, black 78%, transparent 100%);
     }
 
     .waterfall-streams {
@@ -192,12 +194,12 @@ st.markdown(
             repeating-linear-gradient(
                 90deg,
                 transparent 0px,
-                rgba(220, 252, 248, 0.32) 3px,
+                rgba(220, 252, 248, 0.24) 3px,
                 transparent 7px,
-                rgba(115, 218, 210, 0.24) 14px,
+                rgba(115, 218, 210, 0.18) 14px,
                 transparent 22px
             ),
-            radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.32) 0%, transparent 60%);
+            radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
         background-size: 100% 220px, 100% 340px;
         animation: cascadeFall 2.6s linear infinite;
     }
@@ -205,14 +207,14 @@ st.markdown(
     .waterfall-mist-pool {
         position: absolute;
         bottom: -25px;
-        right: -10px;
-        width: 280px;
-        height: 120px;
+        right: -2%;
+        width: 340px;
+        height: 130px;
         border-radius: 50%;
         background: radial-gradient(
             ellipse at center,
-            rgba(215, 252, 248, 0.48) 0%,
-            rgba(82, 204, 196, 0.26) 48%,
+            rgba(215, 252, 248, 0.42) 0%,
+            rgba(82, 204, 196, 0.22) 48%,
             transparent 75%
         );
         filter: blur(10px);
@@ -224,13 +226,18 @@ st.markdown(
         bottom: -8px;
         left: 0;
         width: 200%;
-        height: 145px;
+        height: 155px;
         animation: waveRoll 14s linear infinite;
     }
 
-    @keyframes lotusDrift {
-        0% { transform: translateY(0px) rotate(0deg) scale(1); }
-        100% { transform: translateY(-22px) rotate(12deg) scale(1.06); }
+    @keyframes patternFloat {
+        0% { transform: translate(0px, 0px); }
+        100% { transform: translate(160px, 160px); }
+    }
+
+    @keyframes bokehBreathe {
+        0% { opacity: 0.65; transform: scale(1); }
+        100% { opacity: 1; transform: scale(1.04); }
     }
 
     @keyframes cascadeFall {
@@ -239,7 +246,7 @@ st.markdown(
     }
 
     @keyframes mistPulse {
-        0%, 100% { transform: scale(1) translateY(0px); opacity: 0.78; }
+        0%, 100% { transform: scale(1) translateY(0px); opacity: 0.75; }
         50% { transform: scale(1.14) translateY(-8px); opacity: 1; }
     }
 
@@ -248,36 +255,203 @@ st.markdown(
         100% { transform: translateX(-50%); }
     }
     </style>
-    """
+
+    <div class="sanctuary-water">
+        <div class="sanctuary-pattern"></div>
+        <div class="sanctuary-bokeh"></div>
+        <div class="waterfall-column">
+            <div class="waterfall-streams"></div>
+        </div>
+        <div class="waterfall-mist-pool"></div>
+        <svg class="lagoon-wave" viewBox="0 0 1440 160" preserveAspectRatio="none">
+            <path d="M0,75 C360,145 720,5 1080,85 C1260,120 1350,95 1440,75 L1440,160 L0,160 Z" fill="rgba(45, 175, 168, 0.24)"></path>
+        </svg>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
-     <div class="sanctuary-water">
-        <svg class="lotus-flower lotus-1" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.8">
-            <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
-            <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
-            <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
-            <path d="M100 115 C58 112 28 96 16 74 C46 72 76 88 100 115 Z"/>
-            <path d="M100 115 C142 112 172 96 184 74 C154 72 124 88 100 115 Z"/>
-            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.5"/>
-        </svg>
-        <svg class="lotus-flower lotus-2" viewBox="0 0 200 200" fill="none" stroke="#9ef0e0" stroke-width="1.6">
-            <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
-            <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
-            <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
-            <path d="M100 115 C58 112 28 96 16 74 C46 72 76 88 100 115 Z"/>
-            <path d="M100 115 C142 112 172 96 184 74 C154 72 124 88 100 115 Z"/>
-            <path d="M45 128 Q100 148 155 128" stroke="#ebd5b3" stroke-width="1.5"/>
-        </svg>
-        <svg class="lotus-flower lotus-3" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.6">
-            <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
-            <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
-            <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
-            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.5"/>
-        </svg>
-        <svg class="lotus-flower lotus-4" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.6">
-            <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
-            <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
-            <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
-            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.5"/>
+@st.cache_data(show_spinner=False)
+def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
+    sample_rate = 22050
+    n_samples = sample_rate * duration_sec
+    rng = np.random.default_rng(42)
+    white = rng.standard_normal(n_samples)
+
+    b = np.cumsum(white)
+    b = b - np.mean(b)
+    b = b / (np.max(np.abs(b)) + 1e-6)
+
+    kernel_size = 35 if sound_type == "Soft Rain" else 90
+    kernel = np.ones(kernel_size) / kernel_size
+    smooth_noise = np.convolve(white, kernel, mode="same")
+    smooth_noise = smooth_noise / (np.max(np.abs(smooth_noise)) + 1e-6)
+
+    t = np.linspace(0, duration_sec, n_samples, endpoint=False)
+
+    if sound_type == "Ocean Waves":
+        swell = 0.45 + 0.55 * (0.5 * (1 + np.sin(2 * np.pi * t / 8.5)))
+        audio = (0.65 * b + 0.35 * smooth_noise) * swell
+    elif sound_type == "Forest Waterfall":
+        gentle_flow = 0.88 + 0.12 * np.sin(2 * np.pi * t / 5.0)
+        audio = (0.55 * b + 0.45 * smooth_noise) * gentle_flow
+    else:
+        rain_patter = np.convolve(white, np.ones(12) / 12, mode="same")
+        rain_patter = rain_patter / (np.max(np.abs(rain_patter)) + 1e-6)
+        audio = 0.35 * b + 0.45 * smooth_noise + 0.20 * rain_patter
+
+    fade_len = int(sample_rate * 1.5)
+    audio[:fade_len] *= np.linspace(0, 1, fade_len)
+    audio[-fade_len:] *= np.linspace(1, 0, fade_len)
+
+    pcm = np.int16(np.clip(audio * 0.35, -1.0, 1.0) * 32767)
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sample_rate)
+        wf.writeframes(pcm.tobytes())
+    return buf.getvalue()
+
+
+st.markdown(
+    """
+    <div class="lexi-hero">
+        <h1>🌺 LexiCare</h1>
+        <div class="lexi-badge">Powered by LexiTech • Private Sanctuary &amp; AI Companion</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+components.html(
+    """
+    <div style="width:100%; height:140px; border-radius:20px; overflow:hidden; position:relative;
+                background: radial-gradient(circle at 50% 50%, rgba(36, 128, 126, 0.28), rgba(6, 22, 28, 0.85));
+                border: 1px solid rgba(226, 194, 144, 0.28); box-shadow: inset 0 0 30px rgba(0,0,0,0.45);">
+        <canvas id="orbCanvas" style="width:100%; height:100%; display:block; cursor:grab;"></canvas>
+        <div style="position:absolute; bottom:10px; right:14px; font-family:sans-serif;
+                    font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:rgba(240,222,192,0.75); pointer-events:none;">
+            Move cursor to guide the sanctuary orb
+        </div>
+    </div>
+    <script>
+    const canvas = document.getElementById('orbCanvas');
+    const ctx = canvas.getContext('2d');
+    let w, h, dpr;
+    function resize() {
+        dpr = window.devicePixelRatio || 1;
+        w = canvas.clientWidth;
+        h = canvas.clientHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.scale(dpr, dpr);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let mouse = { x: w * 0.5, y: h * 0.5, active: false };
+    let orb = { x: w * 0.5, y: h * 0.5, vx: 0, vy: 0 };
+
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+        mouse.active = true;
+    });
+    canvas.addEventListener('mouseleave', () => { mouse.active = false; });
+
+    const motes = Array.from({ length: 26 }, (_, i) => ({
+        angle: (i / 26) * Math.PI * 2,
+        radius: 34 + (i % 5) * 14,
+        speed: 0.004 + (i % 4) * 0.002,
+        size: 1.5 + (i % 3) * 1.1,
+        zOffset: (i % 7) * 0.4
+    }));
+
+    let tick = 0;
+    function animate() {
+        tick += 0.025;
+        ctx.clearRect(0, 0, w, h);
+
+        const targetX = mouse.active ? mouse.x : (w * 0.5 + Math.cos(tick * 0.6) * 55);
+        const targetY = mouse.active ? mouse.y : (h * 0.5 + Math.sin(tick * 0.8) * 16);
+
+        orb.vx += (targetX - orb.x) * 0.035;
+        orb.vy += (targetY - orb.y) * 0.035;
+        orb.vx *= 0.86;
+        orb.vy *= 0.86;
+        orb.x += orb.vx;
+        orb.y += orb.vy;
+
+        const breath = 46 + Math.sin(tick * 1.2) * 6;
+        const halo = ctx.createRadialGradient(orb.x, orb.y, 4, orb.x, orb.y, breath * 1.85);
+        halo.addColorStop(0, 'rgba(158, 240, 224, 0.45)');
+        halo.addColorStop(0.45, 'rgba(226, 194, 144, 0.16)');
+        halo.addColorStop(1, 'rgba(10, 35, 42, 0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, breath * 1.85, 0, Math.PI * 2);
+        ctx.fill();
+
+        motes.forEach(m => {
+            m.angle += m.speed;
+            const depth = Math.sin(m.angle + m.zOffset);
+            const mx = orb.x + Math.cos(m.angle) * (m.radius * 1.45);
+            const my = orb.y + depth * (m.radius * 0.42);
+            const scale = 0.65 + (depth + 1) * 0.35;
+            ctx.fillStyle = depth > 0 ? 'rgba(245, 228, 196, 0.82)' : 'rgba(126, 224, 210, 0.42)';
+            ctx.beginPath();
+            ctx.arc(mx, my, m.size * scale, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        const sphereGrad = ctx.createRadialGradient(
+            orb.x - 10, orb.y - 10, 3,
+            orb.x, orb.y, breath * 0.72
+        );
+        sphereGrad.addColorStop(0, '#ffffff');
+        sphereGrad.addColorStop(0.35, '#bff3e8');
+        sphereGrad.addColorStop(0.75, '#3aa89e');
+        sphereGrad.addColorStop(1, 'rgba(18, 72, 76, 0.25)');
+        ctx.fillStyle = sphereGrad;
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, breath * 0.72, 0, Math.PI * 2);
+        ctx.fill();
+
+        requestAnimationFrame(animate);
+    }
+    animate();
+    </script>
+    """,
+    height=150,
+)
+
+render_safety_header()
+
+if st.session_state.get("crisis_locked", False):
+    render_crisis_card()
+    st.stop()
+
+if not st.session_state.accepted_terms:
+    with st.container(border=True):
+        st.subheader("Take a slow breath. Welcome to your sanctuary.")
+        st.write(
+            "LexiCare is a peaceful, judgment-free retreat to talk through your day, "
+            "unwind to ocean waves or rain, and reset whenever life feels heavy."
+        )
+        st.info(
+            "**Before stepping inside, please confirm:**\n"
+            "- Lexi is an AI companion—not a licensed therapist, doctor, or counselor.\n"
+            "- Lexi cannot diagnose conditions or automatically call 911 for you.\n"
+            "- If you are ever in immediate danger, tap **Human Support** at the top or call **988** / **911**."
+        )
+        agreed = st.checkbox(
+            "I understand that LexiCare is an AI wellness companion and not medical or therapy care."
+        )
+        if st.button("Enter Sanctuary", type="primary", disabled=not agreed):
+            st.session_state.accepted_terms = True
+            st.rerun()
+    st.stop()
 async def _generate_free_voice(text: str, output_path: str, rate: str, pitch: str):
     communicate = edge_tts.Communicate(
         text,
@@ -372,7 +546,7 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
                         temperature=0.82,
                         frequency_penalty=0.6,
                     )
-                    reply_text = completion.choices.message.content
+                    reply_text = completion.choices[0].message.content
                     if reply_text:
                         return reply_text.strip()
                 except Exception as e:
