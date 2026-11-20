@@ -36,11 +36,13 @@ st.markdown(
     <style>
     @import url('https://googleapis.com');
 
+    /* Rich, Deep Cancun/Hawaii Twilight Lagoon Base (Zero Washed-Out Fade) */
     .stApp {
-        background: radial-gradient(circle at 20% 10%, #144d56 0%, #08232a 52%, #041216 100%) !important;
-        color: #f3f7f5 !important;
+        background: linear-gradient(160deg, #041318 0%, #092b34 45%, #0d3b44 80%, #05181e 100%) !important;
+        color: #ffffff !important;
     }
 
+    /* Keep ALL Content Cards & Chat Boxes Strictly ON TOP of Waterfall & Flowers */
     [data-testid="stAppViewContainer"] > .main,
     [data-testid="stMainBlockContainer"],
     .block-container {
@@ -51,7 +53,7 @@ st.markdown(
 
     p, label, li, .stMarkdown, input, textarea {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
-        color: #eef5f2 !important;
+        color: #f4f8f6 !important;
     }
 
     h1, h2, h3 {
@@ -60,33 +62,32 @@ st.markdown(
     }
 
     [data-testid="stHeader"] {
-        background: rgba(4, 19, 23, 0.45) !important;
-        backdrop-filter: blur(10px);
+        background: rgba(4, 19, 24, 0.55) !important;
+        backdrop-filter: blur(12px);
         z-index: 20 !important;
     }
 
     [data-testid="stSidebar"] {
-        background: rgba(6, 25, 31, 0.94) !important;
-        backdrop-filter: blur(18px);
-        border-right: 1px solid rgba(226, 194, 144, 0.24);
+        background: linear-gradient(180deg, #051b22 0%, #082730 100%) !important;
+        border-right: 1px solid rgba(235, 213, 179, 0.28);
         z-index: 25 !important;
     }
 
+    /* Hero Sanctuary Card */
     .lexi-hero {
-        background: linear-gradient(145deg, rgba(16, 54, 62, 0.86), rgba(7, 26, 33, 0.92));
-        backdrop-filter: blur(18px);
-        border: 1px solid rgba(226, 194, 144, 0.35);
+        background: linear-gradient(145deg, rgba(11, 45, 54, 0.92), rgba(5, 23, 29, 0.96));
+        border: 1px solid rgba(235, 213, 179, 0.42);
         border-radius: 24px;
         padding: 1.6rem 1.8rem;
         text-align: center;
         margin-bottom: 1rem;
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.48);
     }
 
     .lexi-hero h1 {
         margin: 0;
-        font-size: 2.75rem !important;
-        background: linear-gradient(90deg, #ffffff, #ebd5b3, #b4f0e4);
+        font-size: 2.8rem !important;
+        background: linear-gradient(90deg, #ffffff, #f2dec0, #9ef0e0);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
@@ -96,57 +97,58 @@ st.markdown(
         margin-top: 0.45rem;
         padding: 0.28rem 1rem;
         border-radius: 999px;
-        background: rgba(226, 194, 144, 0.14);
-        border: 1px solid rgba(226, 194, 144, 0.4);
-        color: #f2dfc1 !important;
+        background: rgba(235, 213, 179, 0.16);
+        border: 1px solid rgba(235, 213, 179, 0.45);
+        color: #f7e6c8 !important;
         font-size: 0.76rem;
         letter-spacing: 0.12em;
         text-transform: uppercase;
     }
 
+    /* Rich Frosted Chat Bubbles */
     [data-testid="stChatMessage"] {
-        background: rgba(11, 40, 48, 0.90) !important;
-        backdrop-filter: blur(14px);
-        border: 1px solid rgba(132, 212, 198, 0.28);
+        background: rgba(8, 34, 42, 0.92) !important;
+        border: 1px solid rgba(132, 212, 198, 0.34);
         border-radius: 18px;
         padding: 1.1rem 1.3rem;
         margin-bottom: 0.8rem;
-        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.32);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.36);
     }
 
     [data-testid="stVerticalBlockBorderWrapper"],
     [data-testid="stExpander"] {
-        background: rgba(9, 32, 39, 0.90) !important;
-        border: 1px solid rgba(226, 194, 144, 0.28) !important;
+        background: rgba(7, 29, 36, 0.92) !important;
+        border: 1px solid rgba(235, 213, 179, 0.32) !important;
         border-radius: 16px !important;
     }
 
     .stButton > button {
         border-radius: 12px !important;
-        border: 1px solid rgba(226, 194, 144, 0.38) !important;
-        background: rgba(15, 52, 62, 0.92) !important;
-        color: #f6f8f7 !important;
+        border: 1px solid rgba(235, 213, 179, 0.42) !important;
+        background: rgba(12, 48, 58, 0.94) !important;
+        color: #ffffff !important;
         transition: all 0.22s ease;
     }
 
     .stButton > button:hover {
-        background: rgba(38, 114, 116, 0.95) !important;
-        border-color: #ebd3aa !important;
+        background: rgba(34, 118, 120, 0.98) !important;
+        border-color: #f7e6c8 !important;
         color: #ffffff !important;
     }
 
     .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #2b8c82, #1b6362) !important;
-        border: 1px solid #ebd3aa !important;
+        background: linear-gradient(135deg, #289488, #196664) !important;
+        border: 1px solid #f7e6c8 !important;
     }
 
     textarea, input, [data-testid="stChatInput"] textarea {
-        background-color: rgba(6, 23, 29, 0.95) !important;
-        color: #f5f9f7 !important;
-        border: 1px solid rgba(226, 194, 144, 0.38) !important;
+        background-color: rgba(5, 20, 26, 0.96) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(235, 213, 179, 0.42) !important;
         border-radius: 14px !important;
     }
 
+    /* Background Sanctuary Layer (Strictly BEHIND All Boxes) */
     .sanctuary-water {
         position: fixed;
         inset: 0;
@@ -157,15 +159,15 @@ st.markdown(
 
     .lotus-flower {
         position: absolute;
-        opacity: 0.26;
-        filter: drop-shadow(0 0 12px rgba(235, 213, 179, 0.25));
+        opacity: 0.32;
+        filter: drop-shadow(0 0 14px rgba(235, 213, 179, 0.35));
         animation: lotusDrift 18s ease-in-out infinite alternate;
     }
 
-    .lotus-1 { top: 10%; left: 4%; width: 170px; animation-duration: 16s; }
-    .lotus-2 { top: 48%; left: 2%; width: 220px; opacity: 0.22; animation-duration: 21s; }
-    .lotus-3 { bottom: 12%; left: 8%; width: 150px; animation-duration: 19s; }
-    .lotus-4 { top: 18%; right: 16%; width: 160px; opacity: 0.20; animation-duration: 23s; }
+    .lotus-1 { top: 8%; left: 3%; width: 175px; animation-duration: 16s; }
+    .lotus-2 { top: 46%; left: 2%; width: 225px; opacity: 0.26; animation-duration: 21s; }
+    .lotus-3 { bottom: 10%; left: 7%; width: 155px; animation-duration: 19s; }
+    .lotus-4 { top: 16%; right: 14%; width: 165px; opacity: 0.25; animation-duration: 23s; }
 
     .waterfall-column {
         position: absolute;
@@ -175,9 +177,9 @@ st.markdown(
         height: 100vh;
         background: linear-gradient(
             180deg,
-            rgba(180, 245, 238, 0.04) 0%,
-            rgba(130, 232, 224, 0.20) 45%,
-            rgba(195, 250, 244, 0.38) 100%
+            rgba(180, 245, 238, 0.05) 0%,
+            rgba(130, 232, 224, 0.24) 45%,
+            rgba(195, 250, 244, 0.42) 100%
         );
         mask-image: linear-gradient(90deg, transparent 0%, black 35%, black 100%);
         -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 35%, black 100%);
@@ -190,12 +192,12 @@ st.markdown(
             repeating-linear-gradient(
                 90deg,
                 transparent 0px,
-                rgba(220, 252, 248, 0.28) 3px,
+                rgba(220, 252, 248, 0.32) 3px,
                 transparent 7px,
-                rgba(115, 218, 210, 0.22) 14px,
+                rgba(115, 218, 210, 0.24) 14px,
                 transparent 22px
             ),
-            radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.28) 0%, transparent 60%);
+            radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.32) 0%, transparent 60%);
         background-size: 100% 220px, 100% 340px;
         animation: cascadeFall 2.6s linear infinite;
     }
@@ -209,8 +211,8 @@ st.markdown(
         border-radius: 50%;
         background: radial-gradient(
             ellipse at center,
-            rgba(215, 252, 248, 0.45) 0%,
-            rgba(82, 204, 196, 0.24) 48%,
+            rgba(215, 252, 248, 0.48) 0%,
+            rgba(82, 204, 196, 0.26) 48%,
             transparent 75%
         );
         filter: blur(10px);
@@ -237,7 +239,7 @@ st.markdown(
     }
 
     @keyframes mistPulse {
-        0%, 100% { transform: scale(1) translateY(0px); opacity: 0.75; }
+        0%, 100% { transform: scale(1) translateY(0px); opacity: 0.78; }
         50% { transform: scale(1.14) translateY(-8px); opacity: 1; }
     }
 
@@ -248,38 +250,33 @@ st.markdown(
     </style>
 
     <div class="sanctuary-water">
-        <svg class="lotus-flower lotus-1" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.6">
+        <svg class="lotus-flower lotus-1" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.8">
             <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
             <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
             <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
             <path d="M100 115 C58 112 28 96 16 74 C46 72 76 88 100 115 Z"/>
             <path d="M100 115 C142 112 172 96 184 74 C154 72 124 88 100 115 Z"/>
-            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.4"/>
+            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.5"/>
         </svg>
-        <svg class="lotus-flower lotus-2" viewBox="0 0 200 200" fill="none" stroke="#9ef0e0" stroke-width="1.4">
+        <svg class="lotus-flower lotus-2" viewBox="0 0 200 200" fill="none" stroke="#9ef0e0" stroke-width="1.6">
             <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
             <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
             <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
             <path d="M100 115 C58 112 28 96 16 74 C46 72 76 88 100 115 Z"/>
             <path d="M100 115 C142 112 172 96 184 74 C154 72 124 88 100 115 Z"/>
-            <path d="M45 128 Q100 148 155 128" stroke="#ebd5b3" stroke-width="1.4"/>
+            <path d="M45 128 Q100 148 155 128" stroke="#ebd5b3" stroke-width="1.5"/>
         </svg>
-        <svg class="lotus-flower lotus-3" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.5">
+        <svg class="lotus-flower lotus-3" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.6">
             <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
             <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
             <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
-            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.4"/>
+            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.5"/>
         </svg>
-        <svg class="lotus-flower lotus-4" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.5">
+        <svg class="lotus-flower lotus-4" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.6">
             <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
             <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
             <path d="M100 115 C132 95 155 68 162 40 C132 48 112 75 100 115 Z"/>
-            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.4"/>
-        </svg>
-        <div class="waterfall-column">
-            <div class="waterfall-streams"></div>
-        </div>
-        <div class="waterfall-mist-pool"></div>
+            <path d="M45 128 Q100 148 155 128" stroke="#9ef0e0" stroke-width="1.5"/>
 async def _generate_free_voice(text: str, output_path: str, rate: str, pitch: str):
     communicate = edge_tts.Communicate(
         text,
