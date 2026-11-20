@@ -399,7 +399,7 @@ if not st.session_state.messages:
             "role": "assistant",
             "is_greeting": True,
             "content": (
-                "Hey... welcome in. Take a breath, watch the waterfall cascade on the right, and turn on "
+                "Hey... welcome in. Take a breath, click around with the halo ball above, and turn on "
                 "some ocean waves or soft rain in the sidebar if you'd like. Whether you want to vent about "
                 "a heavy day, sort through something on your mind, or just want company—I'm right here. "
                 "How are you feeling right now?"
