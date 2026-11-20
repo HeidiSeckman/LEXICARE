@@ -36,17 +36,27 @@ st.markdown(
 
     <style>
     :root {
-        --glass-card: rgba(11, 52, 60, 0.88);
-        --gold-champagne: #f5e2c4;
+        --glass-card: rgba(12, 56, 65, 0.90);
+        --gold-champagne: #f6e3c5;
         --seafoam: #a8f5e6;
         --text-main: #fbfefd;
     }
 
-    html, body, [data-testid="stAppViewContainer"], .stApp {
-        background: radial-gradient(circle at 22% 12%, #1d6d78 0%, #0f454e 45%, #082930 100%) !important;
+    /* Full Beachfront Lagoon Gradient — Zero Black Bars Anywhere */
+    html, body, .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"],
+    [data-testid="stBottom"],
+    [data-testid="stBottom"] > div,
+    [data-testid="stBottomBlockContainer"] {
+        background: transparent !important;
         color: var(--text-main) !important;
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
-        overflow-x: hidden;
+    }
+
+    .stApp {
+        background: linear-gradient(145deg, #1b6d79 0%, #114c56 48%, #0a343c 100%) !important;
+        overflow-x: hidden !important;
     }
 
     [data-testid="stIconMaterial"], .material-symbols-rounded {
@@ -65,26 +75,28 @@ st.markdown(
         z-index: 30 !important;
     }
 
-    /* Sunlit Beachfront Lagoon Sidebar (Never Black) */
+    /* Luxury Beachfront Spa Sidebar with Golden Lotus Glow */
     [data-testid="stSidebar"],
     [data-testid="stSidebar"] > div:first-child {
-        background: linear-gradient(180deg, rgba(22, 88, 97, 0.92) 0%, rgba(13, 58, 66, 0.95) 55%, rgba(10, 44, 51, 0.97) 100%) !important;
+        background:
+            radial-gradient(circle at 85% 12%, rgba(246, 227, 197, 0.16) 0%, transparent 45%),
+            radial-gradient(circle at 15% 88%, rgba(168, 245, 230, 0.14) 0%, transparent 50%),
+            linear-gradient(180deg, rgba(24, 96, 106, 0.94) 0%, rgba(14, 62, 70, 0.97) 100%) !important;
         backdrop-filter: blur(22px) !important;
-        border-right: 1px solid rgba(245, 226, 196, 0.28) !important;
-        box-shadow: 8px 0 32px rgba(4, 24, 29, 0.35) !important;
+        border-right: 1px solid rgba(246, 227, 197, 0.35) !important;
+        box-shadow: 6px 0 28px rgba(6, 30, 35, 0.28) !important;
         z-index: 30 !important;
     }
 
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span {
-        color: #f7fbfb !important;
+        color: #f9fdfd !important;
     }
 
+    /* Keep All Content Cards Strictly Above Background Waterfall & Lotuses */
     .main .block-container,
-    [data-testid="stAppViewBlockContainer"],
-    [data-testid="stBottom"],
-    [data-testid="stBottomBlockContainer"] {
+    [data-testid="stAppViewBlockContainer"] {
         position: relative !important;
         z-index: 25 !important;
     }
@@ -95,124 +107,104 @@ st.markdown(
         color: var(--gold-champagne) !important;
     }
 
-    p, div, span, label, input, textarea, button {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    .sanctuary-bg-layer {
-        position: fixed;
-        inset: 0;
-        z-index: 1;
-        pointer-events: none;
-        overflow: hidden;
-    }
-
-    .waterfall-column {
+    /* Fixed Background Layer (Tucked Behind Boxes at z-index: 1) */
+    .spa-backdrop {
         position: fixed;
         top: 0;
-        right: 0;
-        width: 175px;
+        left: 0;
+        width: 100vw;
         height: 100vh;
         z-index: 1;
         pointer-events: none;
-        background: linear-gradient(90deg, rgba(168, 245, 230, 0) 0%, rgba(168, 245, 230, 0.14) 28%, rgba(225, 253, 250, 0.28) 68%, rgba(245, 226, 196, 0.22) 100%);
         overflow: hidden;
     }
 
-    .wf-layer-1 {
+    /* Animated Right-Edge Cascading Waterfall (Tucked Behind Cards) */
+    .spa-waterfall {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 185px;
+        height: 100vh;
+        z-index: 1;
+        pointer-events: none;
+        background: linear-gradient(90deg, rgba(168, 245, 230, 0) 0%, rgba(168, 245, 230, 0.16) 28%, rgba(230, 255, 252, 0.32) 70%, rgba(246, 227, 197, 0.24) 100%);
+        overflow: hidden;
+    }
+
+    .spa-wf-stream1 {
         position: absolute;
         top: -240px;
         left: 0;
-        right: 0;
-        bottom: 0;
-        background-image: repeating-linear-gradient(90deg, transparent 0px, transparent 8px, rgba(235, 255, 253, 0.28) 11px, transparent 14px, rgba(245, 226, 196, 0.20) 20px, transparent 25px);
+        width: 100%;
+        height: calc(100% + 240px);
+        background-image: repeating-linear-gradient(90deg, transparent 0px, transparent 8px, rgba(235, 255, 253, 0.30) 11px, transparent 14px, rgba(246, 227, 197, 0.22) 20px, transparent 25px);
         background-size: 100% 240px;
-        animation: wfDropSlow 2.3s linear infinite;
+        animation: fallSlow 2.2s linear infinite;
     }
 
-    .wf-layer-2 {
+    .spa-wf-stream2 {
         position: absolute;
         top: -180px;
         left: 0;
-        right: 0;
-        bottom: 0;
-        background-image: repeating-linear-gradient(90deg, transparent 0px, rgba(255, 255, 255, 0.42) 2px, transparent 5px, transparent 15px);
+        width: 100%;
+        height: calc(100% + 180px);
+        background-image: repeating-linear-gradient(90deg, transparent 0px, rgba(255, 255, 255, 0.45) 2px, transparent 5px, transparent 15px);
         background-size: 100% 180px;
-        animation: wfDropFast 1.25s linear infinite;
+        animation: fallFast 1.2s linear infinite;
     }
 
-    @keyframes wfDropSlow {
-        0% { transform: translateY(0px); }
+    @keyframes fallSlow {
+        0% { transform: translateY(0); }
         100% { transform: translateY(240px); }
     }
 
-    @keyframes wfDropFast {
-        0% { transform: translateY(0px); }
+    @keyframes fallFast {
+        0% { transform: translateY(0); }
         100% { transform: translateY(180px); }
     }
 
-    .waterfall-mist {
+    .spa-mist {
         position: fixed;
         bottom: 0;
         right: 0;
-        width: 300px;
+        width: 310px;
         height: 130px;
-        background: radial-gradient(ellipse at 80% 100%, rgba(230, 255, 252, 0.48) 0%, rgba(168, 245, 230, 0.18) 50%, transparent 78%);
+        z-index: 1;
+        pointer-events: none;
+        background: radial-gradient(ellipse at 82% 100%, rgba(235, 255, 252, 0.50) 0%, rgba(168, 245, 230, 0.18) 52%, transparent 78%);
         filter: blur(10px);
-        animation: mistBreathe 3.5s ease-in-out infinite;
-    }
-
-    .lagoon-wave {
-        position: fixed;
-        bottom: -10px;
-        left: 0;
-        width: 200%;
-        height: 52px;
-        background: linear-gradient(180deg, rgba(168, 245, 230, 0.18), rgba(245, 226, 196, 0.14));
-        border-top: 1px solid rgba(245, 226, 196, 0.35);
-        border-radius: 50% 50% 0 0;
-        animation: lagoonRoll 8s ease-in-out infinite alternate;
-    }
-
-    @keyframes mistBreathe {
-        0%, 100% { opacity: 0.75; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.08); }
-    }
-
-    @keyframes lagoonRoll {
-        0% { transform: translateX(0%) translateY(0px); }
-        100% { transform: translateX(-25%) translateY(-6px); }
     }
     .golden-lotus {
-        position: absolute;
-        opacity: 0.48;
-        filter: drop-shadow(0 0 16px rgba(250, 220, 155, 0.95)) drop-shadow(0 0 36px rgba(240, 195, 110, 0.72));
-        animation: lotusDrift 14s ease-in-out infinite;
+        position: fixed;
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0.55;
+        filter: drop-shadow(0 0 14px rgba(252, 224, 158, 0.95)) drop-shadow(0 0 32px rgba(242, 196, 108, 0.75));
+        animation: lotusDrift 13s ease-in-out infinite;
     }
-    .lotus-1 { top: 6%; left: 2%; width: 118px; animation-delay: 0s; }
-    .lotus-2 { top: 28%; left: 4%; width: 92px; animation-delay: -3s; }
-    .lotus-3 { top: 54%; left: 1.5%; width: 128px; animation-delay: -6s; }
-    .lotus-4 { bottom: 10%; left: 3.5%; width: 102px; animation-delay: -9s; }
-    .lotus-5 { top: 8%; right: 13%; width: 110px; animation-delay: -2s; }
-    .lotus-6 { top: 34%; right: 15%; width: 88px; animation-delay: -5s; }
-    .lotus-7 { top: 60%; right: 12.5%; width: 122px; animation-delay: -8s; }
-    .lotus-8 { bottom: 12%; right: 14%; width: 98px; animation-delay: -11s; }
+    .lotus-1 { top: 8%; left: 22rem; width: 105px; animation-delay: 0s; }
+    .lotus-2 { top: 38%; left: 21.5rem; width: 88px; animation-delay: -3s; }
+    .lotus-3 { bottom: 14%; left: 22.5rem; width: 112px; animation-delay: -6s; }
+    .lotus-4 { top: 10%; right: 13%; width: 105px; animation-delay: -2s; }
+    .lotus-5 { top: 42%; right: 14.5%; width: 92px; animation-delay: -5s; }
+    .lotus-6 { bottom: 15%; right: 13.5%; width: 110px; animation-delay: -8s; }
 
     @keyframes lotusDrift {
         0%, 100% { transform: translateY(0px) rotate(-3deg) scale(1); }
-        50% { transform: translateY(-18px) rotate(5deg) scale(1.06); }
+        50% { transform: translateY(-16px) rotate(5deg) scale(1.05); }
     }
 
     .lexicare-hero {
         position: relative;
         z-index: 25;
-        background: linear-gradient(145deg, rgba(16, 68, 78, 0.92), rgba(10, 46, 54, 0.95));
+        background: linear-gradient(145deg, rgba(16, 68, 78, 0.94), rgba(10, 46, 54, 0.96));
         backdrop-filter: blur(22px);
-        border: 1px solid rgba(245, 226, 196, 0.42);
+        border: 1px solid rgba(246, 227, 197, 0.42);
         border-radius: 26px;
         padding: 2rem 1.8rem 1.8rem;
         text-align: center;
-        box-shadow: 0 20px 50px rgba(4, 24, 30, 0.45), inset 0 1px 0 rgba(255, 248, 235, 0.25);
+        box-shadow: 0 18px 44px rgba(4, 24, 30, 0.42);
         margin-bottom: 1rem;
     }
 
@@ -223,7 +215,6 @@ st.markdown(
         color: #fbf0dc !important;
         margin: 0 !important;
         line-height: 1.08 !important;
-        text-shadow: 0 2px 18px rgba(245, 226, 196, 0.35);
     }
 
     .lexicare-pill {
@@ -232,7 +223,7 @@ st.markdown(
         padding: 0.38rem 1.15rem;
         border-radius: 999px;
         background: rgba(168, 245, 230, 0.14);
-        border: 1px solid rgba(245, 226, 196, 0.38);
+        border: 1px solid rgba(246, 227, 197, 0.38);
         color: var(--gold-champagne);
         font-size: 0.72rem;
         font-weight: 600;
@@ -245,44 +236,48 @@ st.markdown(
         z-index: 25 !important;
         background: var(--glass-card) !important;
         backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(245, 226, 196, 0.30) !important;
+        border: 1px solid rgba(246, 227, 197, 0.30) !important;
         border-radius: 20px !important;
-        box-shadow: 0 10px 28px rgba(4, 24, 30, 0.32) !important;
     }
 
     [data-testid="stChatInput"] {
         position: relative !important;
         z-index: 30 !important;
-        background: rgba(12, 54, 63, 0.96) !important;
-        border: 1px solid rgba(245, 226, 196, 0.42) !important;
+        background: rgba(12, 56, 65, 0.96) !important;
+        border: 1px solid rgba(246, 227, 197, 0.42) !important;
         border-radius: 18px !important;
     }
 
     .stButton > button {
-        background: linear-gradient(135deg, rgba(28, 102, 112, 0.92), rgba(16, 68, 78, 0.95)) !important;
+        background: linear-gradient(135deg, rgba(28, 102, 112, 0.94), rgba(16, 68, 78, 0.96)) !important;
         color: #fbf0dc !important;
-        border: 1px solid rgba(245, 226, 196, 0.42) !important;
+        border: 1px solid rgba(246, 227, 197, 0.42) !important;
         border-radius: 14px !important;
+    }
+
+    .sidebar-lotus-card {
+        background: linear-gradient(145deg, rgba(246, 227, 197, 0.14), rgba(168, 245, 230, 0.08));
+        border: 1px solid rgba(246, 227, 197, 0.38);
+        border-radius: 18px;
+        padding: 1rem 0.9rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        box-shadow: 0 8px 24px rgba(4, 24, 30, 0.25);
     }
     </style>
 
-    <div class="sanctuary-bg-layer">
-        <svg class="golden-lotus lotus-1" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.62"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.62"/></svg>
-        <svg class="golden-lotus lotus-2" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.9"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.75"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.75"/></svg>
-        <svg class="golden-lotus lotus-3" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.62"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.62"/></svg>
-        <svg class="golden-lotus lotus-4" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.9"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.75"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.75"/></svg>
-        <svg class="golden-lotus lotus-5" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>
-        <svg class="golden-lotus lotus-6" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.9"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.75"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.75"/></svg>
-        <svg class="golden-lotus lotus-7" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.62"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.62"/></svg>
-        <svg class="golden-lotus lotus-8" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.9"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.75"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.75"/></svg>
+    <svg class="golden-lotus lotus-1" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/></svg>
+    <svg class="golden-lotus lotus-2" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>
+    <svg class="golden-lotus lotus-3" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/></svg>
+    <svg class="golden-lotus lotus-4" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>
+    <svg class="golden-lotus lotus-5" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/></svg>
+    <svg class="golden-lotus lotus-6" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>
 
-        <div class="waterfall-column">
-            <div class="wf-layer-1"></div>
-            <div class="wf-layer-2"></div>
-        </div>
-        <div class="waterfall-mist"></div>
-        <div class="lagoon-wave"></div>
+    <div class="spa-waterfall">
+        <div class="spa-wf-stream1"></div>
+        <div class="spa-wf-stream2"></div>
     </div>
+    <div class="spa-mist"></div>
     """,
     unsafe_allow_html=True,
 )
@@ -445,7 +440,20 @@ if "latest_voice_bytes" not in st.session_state:
 
 
 with st.sidebar:
-    st.markdown(f"## {LOTUS} Sanctuary Controls")
+    st.markdown(
+        f"""
+        <div class="sidebar-lotus-card">
+            <div style="font-size:1.8rem; margin-bottom:0.2rem;">{LOTUS}</div>
+            <div style="font-family:'Cormorant Garamond',serif; font-size:1.45rem; font-weight:600; color:#fbf0dc;">
+                Sanctuary Controls
+            </div>
+            <div style="font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; color:#a8f5e6; margin-top:0.2rem;">
+                Twilight Lagoon Retreat
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     chat_mode = st.selectbox(
         "How can LEXI support you right now?",
@@ -460,7 +468,7 @@ with st.sidebar:
     voice_enabled = st.toggle("LEXI Voice Replies (Ava Neural)", value=True)
 
     st.markdown("---")
-    st.markdown("### Ambient Soundscapes")
+    st.markdown(f"### {LOTUS} Ambient Soundscapes")
     sound_choice = st.selectbox(
         "Choose a soothing backdrop",
         options=["None", "Ocean Waves", "Soft Rain", "Forest Waterfall"],
@@ -470,7 +478,7 @@ with st.sidebar:
         st.audio(generate_soundscape_wav(sound_choice), format="audio/wav", loop=True)
 
     st.markdown("---")
-    st.markdown("### 60-Second Calm Reset")
+    st.markdown(f"### {LOTUS} 60-Second Calm Reset")
     if st.button("Start 60s Guided Breath", use_container_width=True):
         breath_box = st.empty()
         cycles = [
@@ -486,7 +494,7 @@ with st.sidebar:
         breath_box.success("Beautiful. Notice your shoulders dropping.")
 
     st.markdown("---")
-    st.markdown("### Worry Release")
+    st.markdown(f"### {LOTUS} Worry Release")
     worry_text = st.text_area(
         "Write down a heavy thought to let go of:",
         placeholder="Type anything weighing on you, then dissolve it into the lagoon...",
@@ -515,12 +523,15 @@ st.markdown(
 
 st.components.v1.html(
     """
-    <div style="position:relative; width:100%; height:150px; border-radius:22px; overflow:hidden;
+    <style>
+        html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
+    </style>
+    <div style="box-sizing:border-box; position:relative; width:100%; height:148px; border-radius:22px; overflow:hidden;
                 background: radial-gradient(circle at 30% 40%, rgba(25,104,115,0.92), rgba(10,48,56,0.96));
-                border: 1px solid rgba(245, 226, 196, 0.38); box-shadow: 0 14px 36px rgba(4,24,30,0.45);">
+                border: 1px solid rgba(246, 227, 197, 0.38);">
         <canvas id="orbCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
         <div style="position:absolute; bottom:10px; right:16px; font-family:'Plus Jakarta Sans',sans-serif;
-                    font-size:11px; letter-spacing:0.12em; color:#f5e2c4; opacity:0.88; pointer-events:none;">
+                    font-size:11px; letter-spacing:0.12em; color:#f6e3c5; opacity:0.88; pointer-events:none;">
             MOVE CURSOR TO GUIDE THE SANCTUARY ORB
         </div>
     </div>
@@ -543,7 +554,7 @@ st.components.v1.html(
 
         const pearls = Array.from({ length: 22 }, (_, i) => ({
             x: Math.random() * 650,
-            y: Math.random() * 150,
+            y: Math.random() * 148,
             r: 1.4 + Math.random() * 2.8,
             speed: 0.25 + Math.random() * 0.55,
             gold: i % 2 === 0
@@ -631,7 +642,7 @@ st.components.v1.html(
         animate();
     </script>
     """,
-    height=160,
+    height=150,
 )
 
 render_safety_header()
