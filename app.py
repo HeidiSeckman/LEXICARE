@@ -10,12 +10,16 @@ from google import genai
 from google.genai import types
 from groq import Groq
 
-from safety_shield import evaluate_safety, render_crisis_banner, render_trusted_person_setup
+from safety_shield import (
+    check_safety_level,
+    render_safety_header,
+    render_crisis_card,
+    render_distress_grounding,
+)
 from lexi_identity import get_lexicare_identity
 
 LOTUS = "\U0001fab7"
 SPARKLE = "\u2728"
-SOS = "\U0001f198"
 
 st.set_page_config(
     page_title="LexiCare | Powered by LexiTech",
@@ -333,7 +337,7 @@ def get_lexi_response(user_prompt: str, messages: list, chat_mode: str, safety_l
                 for m in available_models.data
                 if "llama" in m.id.lower() and "guard" not in m.id.lower() and "vision" not in m.id.lower()
             ]
-            chosen_model = llama_models if llama_models else "llama-3.3-70b-versatile"
+            chosen_model = llama_models[0] if llama_models else "llama-3.3-70b-versatile"
 
             groq_messages = [{"role": "system", "content": system_instruction}]
             for msg in prior_turns[-12:]:
@@ -346,7 +350,7 @@ def get_lexi_response(user_prompt: str, messages: list, chat_mode: str, safety_l
                 temperature=0.65,
                 max_tokens=700,
             )
-            reply = completion.choices.message.content
+            reply = completion.choices[0].message.content
             if reply:
                 return reply.strip()
         except Exception:
@@ -369,8 +373,8 @@ if "messages" not in st.session_state:
         }
     ]
 
-if "show_human_support" not in st.session_state:
-    st.session_state.show_human_support = False
+if "crisis_locked" not in st.session_state:
+    st.session_state.crisis_locked = False
 
 if "latest_voice_bytes" not in st.session_state:
     st.session_state.latest_voice_bytes = None
@@ -433,6 +437,8 @@ with st.sidebar:
         st.session_state.messages = [st.session_state.messages[0]]
         st.session_state.latest_voice_bytes = None
         st.rerun()
+
+
 st.markdown(
     f"""
     <div class="lexicare-hero">
@@ -525,51 +531,46 @@ st.components.v1.html(
     height=145,
 )
 
-col_disc, col_sos = st.columns([3.2, 1.3])
-with col_disc:
-    st.caption(
-        "Lexi is an AI companion for reflection and calm—not a therapist or medical professional."
-    )
-with col_sos:
-    if st.button(f"{SOS} Human Support", use_container_width=True):
-        st.session_state.show_human_support = not st.session_state.show_human_support
+render_safety_header()
 
-if st.session_state.show_human_support:
-    render_crisis_banner("HIGH")
+if st.session_state.crisis_locked:
+    render_crisis_card()
+else:
+    for msg in st.session_state.messages:
+        avatar = LOTUS if msg["role"] == "assistant" else SPARKLE
+        with st.chat_message(msg["role"], avatar=avatar):
+            st.markdown(msg["content"])
 
-render_trusted_person_setup()
+    if st.session_state.latest_voice_bytes and voice_enabled:
+        st.audio(st.session_state.latest_voice_bytes, format="audio/mp3", autoplay=True)
 
-for msg in st.session_state.messages:
-    avatar = LOTUS if msg["role"] == "assistant" else SPARKLE
-    with st.chat_message(msg["role"], avatar=avatar):
-        st.markdown(msg["content"])
+    if prompt := st.chat_input("Speak with Lexi..."):
+        safety_level = check_safety_level(prompt)
+        if safety_level == "CRISIS":
+            st.session_state.crisis_locked = True
+            st.rerun()
 
-if st.session_state.latest_voice_bytes and voice_enabled:
-    st.audio(st.session_state.latest_voice_bytes, format="audio/mp3", autoplay=True)
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user", avatar=SPARKLE):
+            st.markdown(prompt)
 
-if prompt := st.chat_input("Speak with Lexi..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar=SPARKLE):
-        st.markdown(prompt)
+        if safety_level == "DISTRESS":
+            render_distress_grounding()
 
-    safety_level = evaluate_safety(prompt)
-    if safety_level in ("HIGH", "MODERATE"):
-        render_crisis_banner(safety_level)
+        with st.chat_message("assistant", avatar=LOTUS):
+            with st.spinner("LEXI is listening..."):
+                reply = get_lexi_response(
+                    user_prompt=prompt,
+                    messages=st.session_state.messages,
+                    chat_mode=chat_mode,
+                    safety_level=safety_level,
+                )
+                st.markdown(reply)
 
-    with st.chat_message("assistant", avatar=LOTUS):
-        with st.spinner("LEXI is listening..."):
-            reply = get_lexi_response(
-                user_prompt=prompt,
-                messages=st.session_state.messages,
-                chat_mode=chat_mode,
-                safety_level=safety_level,
-            )
-            st.markdown(reply)
+        st.session_state.messages.append({"role": "assistant", "content": reply})
 
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-
-    if voice_enabled:
-        voice_data = generate_lexi_voice(reply, chat_mode)
-        st.session_state.latest_voice_bytes = voice_data
-        if voice_data:
-            st.audio(voice_data, format="audio/mp3", autoplay=True)
+        if voice_enabled:
+            voice_data = generate_lexi_voice(reply, chat_mode)
+            st.session_state.latest_voice_bytes = voice_data
+            if voice_data:
+                st.audio(voice_data, format="audio/mp3", autoplay=True)
