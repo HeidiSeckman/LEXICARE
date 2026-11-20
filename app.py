@@ -24,7 +24,7 @@ SPARKLE = "\u2728"
 
 st.set_page_config(
     page_title="LexiCare | Powered by LexiTech",
-    page_icon=LOTUS,
+    page_icon="lexicare-logo.png",
     layout="centered",
     initial_sidebar_state="expanded",
 )
