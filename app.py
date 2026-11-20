@@ -471,6 +471,7 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
                 if "whisper" not in m.id.lower()
                 and "guard" not in m.id.lower()
                 and "tts" not in m.id.lower()
+                and "gpt" not in m.id.lower()
             ]
             preferred = [m for m in available if "llama" in m.lower()] + available
             groq_messages = [{"role": "system", "content": full_instruction}]
