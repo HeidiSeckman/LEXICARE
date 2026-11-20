@@ -40,11 +40,20 @@ if "chat_mode" not in st.session_state:
 if "latest_voice_bytes" not in st.session_state:
     st.session_state.latest_voice_bytes = None
 
-PAGE_STYLE_1 = (
+ST_OPEN = "<" + "style>"
+ST_CLOSE = "<" + "/style>"
+SV_OPEN = "<" + "svg"
+SV_CLOSE = "<" + "/svg>"
+SC_OPEN = "<" + "script>"
+SC_CLOSE = "<" + "/script>"
+
+FONTS_HTML = (
     '<link rel="preconnect" href="https://googleapis.com">'
     '<link rel="preconnect" href="https://gstatic.com" crossorigin>'
     '<link href="https://googleapis.com/css2?family=Cinzel+Decorative:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">'
-    '<style>'
+)
+
+CSS_1 = (
     ':root { --glass-card: rgba(12, 56, 65, 0.90); --gold-champagne: #f6e3c5; --seafoam: #a8f5e6; --text-main: #fbfefd; }'
     'html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"], [data-testid="stBottom"], [data-testid="stBottom"] > div, [data-testid="stBottomBlockContainer"] {'
     '  background: transparent !important; color: var(--text-main) !important; font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif !important; }'
@@ -62,6 +71,8 @@ PAGE_STYLE_1 = (
     '.spa-wf-stream2 { position: absolute; top: -180px; left: 0; width: 100%; height: calc(100% + 180px); background-image: repeating-linear-gradient(90deg, transparent 0px, rgba(255, 255, 255, 0.45) 2px, transparent 5px, transparent 15px); background-size: 100% 180px; animation: fallFast 1.2s linear infinite; }'
     '@keyframes fallSlow { 0% { transform: translateY(0); } 100% { transform: translateY(240px); } }'
     '@keyframes fallFast { 0% { transform: translateY(0); } 100% { transform: translateY(180px); } }'
+)
+CSS_2 = (
     '.spa-mist { position: fixed; bottom: 0; right: 0; width: 310px; height: 130px; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at 82% 100%, rgba(235, 255, 252, 0.50) 0%, rgba(168, 245, 230, 0.18) 52%, transparent 78%); filter: blur(10px); }'
     '.lagoon-wave { position: fixed; bottom: -8px; left: 0; width: 200%; height: 145px; z-index: 1; pointer-events: none; animation: waveRoll 14s linear infinite; }'
     '@keyframes waveRoll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }'
@@ -81,10 +92,26 @@ PAGE_STYLE_1 = (
     '.sidebar-mote { position: absolute; bottom: -10px; border-radius: 50%; background: radial-gradient(circle, #fffdf7 0%, #fbe4b4 55%, transparent 100%); box-shadow: 0 0 8px rgba(251, 228, 180, 0.85); animation: sidebarMoteRise linear infinite; }'
     '@keyframes sidebarMoteRise { 0% { transform: translateY(0px) translateX(0px); opacity: 0; } 15% { opacity: 0.85; } 85% { opacity: 0.75; } 100% { transform: translateY(-102vh) translateX(14px); opacity: 0; } }'
     '.sidebar-lotus-card { background: linear-gradient(145deg, rgba(246, 227, 197, 0.16), rgba(168, 245, 230, 0.10)); border: 1px solid rgba(246, 227, 197, 0.42); border-radius: 18px; padding: 1rem 0.9rem; text-align: center; margin-bottom: 1rem; box-shadow: 0 8px 24px rgba(4, 24, 30, 0.25); }'
-    '</style>'
 )
 
 PETALS_5 = '<path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/>'
+PETALS_3 = '<path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/>'
+
+BG_ELEMENTS = (
+    f'{SV_OPEN} class="golden-lotus lotus-1" viewBox="0 0 120 120" fill="none">{PETALS_5}{SV_CLOSE}'
+    f'{SV_OPEN} class="golden-lotus lotus-2" viewBox="0 0 120 120" fill="none">{PETALS_3}{SV_CLOSE}'
+    f'{SV_OPEN} class="golden-lotus lotus-3" viewBox="0 0 120 120" fill="none">{PETALS_5}{SV_CLOSE}'
+    f'{SV_OPEN} class="golden-lotus lotus-4" viewBox="0 0 120 120" fill="none">{PETALS_3}{SV_CLOSE}'
+    f'{SV_OPEN} class="golden-lotus lotus-5" viewBox="0 0 120 120" fill="none">{PETALS_3}{SV_CLOSE}'
+    f'{SV_OPEN} class="golden-lotus lotus-6" viewBox="0 0 120 120" fill="none">{PETALS_3}{SV_CLOSE}'
+    '<div class="spa-waterfall"><div class="spa-wf-stream1"></div><div class="spa-wf-stream2"></div></div>'
+    '<div class="spa-mist"></div>'
+    f'{SV_OPEN} class="lagoon-wave" viewBox="0 0 1440 160" preserveAspectRatio="none">'
+    '<path d="M0,75 C360,145 720,5 1080,85 C1260,120 1350,95 1440,75 L1440,160 L0,160 Z" fill="rgba(45, 175, 168, 0.24)"></path>'
+    f'{SV_CLOSE}'
+)
+
+st.markdown(FONTS_HTML + ST_OPEN + CSS_1 + CSS_2 + ST_CLOSE + BG_ELEMENTS, unsafe_allow_html=True)
 @st.cache_data(show_spinner=False)
 def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
     sample_rate = 22050
@@ -123,90 +150,40 @@ def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
 
 
 st.markdown(
-    f'<div class="lexicare-hero">'
-    f'<h1 class="lexicare-title">{LOTUS} LexiCare</h1>'
-    f'<div class="lexicare-pill">Powered by LexiTech &bull; Private Sanctuary &amp; AI Companion</div>'
-    f'</div>',
+    f'<div class="lexicare-hero"><h1 class="lexicare-title">{LOTUS} LexiCare</h1>'
+    f'<div class="lexicare-pill">Powered by LexiTech &bull; Private Sanctuary &amp; AI Companion</div></div>',
     unsafe_allow_html=True,
 )
+
 ORB_JS = (
-    'const canvas = document.getElementById("orbCanvas");'
-    'const ctx = canvas.getContext("2d");'
-    'function resize() {'
-    '  canvas.width = canvas.offsetWidth * window.devicePixelRatio;'
-    '  canvas.height = canvas.offsetHeight * window.devicePixelRatio;'
-    '  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);'
-    '}'
-    'resize();'
-    'window.addEventListener("resize", resize);'
-    'let targetX = canvas.offsetWidth * 0.28;'
-    'let targetY = canvas.offsetHeight * 0.50;'
-    'let orbX = targetX; let orbY = targetY; let angle = 0;'
-    'const pearls = Array.from({ length: 22 }, (_, i) => ({'
-    '  x: Math.random() * 650, y: Math.random() * 148,'
-    '  r: 1.4 + Math.random() * 2.8, speed: 0.25 + Math.random() * 0.55, gold: i % 2 === 0'
-    '}));'
+    'const canvas = document.getElementById("orbCanvas"); const ctx = canvas.getContext("2d");'
+    'function resize() { canvas.width = canvas.offsetWidth * window.devicePixelRatio; canvas.height = canvas.offsetHeight * window.devicePixelRatio; ctx.scale(window.devicePixelRatio, window.devicePixelRatio); }'
+    'resize(); window.addEventListener("resize", resize);'
+    'let targetX = canvas.offsetWidth * 0.28; let targetY = canvas.offsetHeight * 0.50; let orbX = targetX; let orbY = targetY; let angle = 0;'
+    'const pearls = Array.from({ length: 22 }, (_, i) => ({ x: Math.random() * 650, y: Math.random() * 148, r: 1.4 + Math.random() * 2.8, speed: 0.25 + Math.random() * 0.55, gold: i % 2 === 0 }));'
     'const trail = [];'
-    'canvas.addEventListener("mousemove", (e) => {'
-    '  const rect = canvas.getBoundingClientRect();'
-    '  targetX = e.clientX - rect.left; targetY = e.clientY - rect.top;'
-    '  trail.push({ x: targetX, y: targetY, alpha: 0.55, r: 8 });'
-    '  if (trail.length > 18) trail.shift();'
-    '});'
+    'canvas.addEventListener("mousemove", (e) => { const rect = canvas.getBoundingClientRect(); targetX = e.clientX - rect.left; targetY = e.clientY - rect.top; trail.push({ x: targetX, y: targetY, alpha: 0.55, r: 8 }); if (trail.length > 18) trail.shift(); });'
     'function animate() {'
-    '  const w = canvas.offsetWidth; const h = canvas.offsetHeight;'
-    '  ctx.clearRect(0, 0, w, h);'
-    '  angle += 0.025;'
+    '  const w = canvas.offsetWidth; const h = canvas.offsetHeight; ctx.clearRect(0, 0, w, h); angle += 0.025;'
     '  orbX += (targetX - orbX) * 0.08; orbY += (targetY - orbY) * 0.08;'
-    '  pearls.forEach(p => {'
-    '    p.y -= p.speed;'
-    '    if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }'
-    '    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);'
-    '    ctx.fillStyle = p.gold ? "rgba(251, 228, 180, 0.65)" : "rgba(168, 245, 230, 0.55)";'
-    '    ctx.fill();'
-    '  });'
-    '  trail.forEach(t => {'
-    '    t.alpha *= 0.92; t.r += 0.35;'
-    '    ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);'
-    '    ctx.strokeStyle = `rgba(245, 226, 196, ${t.alpha})`;'
-    '    ctx.lineWidth = 1.2; ctx.stroke();'
-    '  });'
-    '  const pulse = Math.sin(angle * 1.4) * 5;'
-    '  const outerGlow = ctx.createRadialGradient(orbX, orbY, 4, orbX, orbY, 64 + pulse);'
-    '  outerGlow.addColorStop(0, "rgba(255, 253, 248, 0.98)");'
-    '  outerGlow.addColorStop(0.25, "rgba(251, 228, 180, 0.65)");'
-    '  outerGlow.addColorStop(0.58, "rgba(168, 245, 230, 0.28)");'
-    '  outerGlow.addColorStop(1, "rgba(168, 245, 230, 0)");'
-    '  ctx.beginPath(); ctx.arc(orbX, orbY, 64 + pulse, 0, Math.PI * 2);'
-    '  ctx.fillStyle = outerGlow; ctx.fill();'
-    '  ctx.save(); ctx.translate(orbX, orbY); ctx.rotate(angle);'
-    '  ctx.beginPath(); ctx.ellipse(0, 0, 34, 13, 0, 0, Math.PI * 2);'
-    '  ctx.strokeStyle = "rgba(251, 228, 180, 0.65)"; ctx.lineWidth = 1.4; ctx.stroke();'
-    '  ctx.rotate(-angle * 1.8);'
-    '  ctx.beginPath(); ctx.ellipse(0, 0, 28, 11, Math.PI / 3, 0, Math.PI * 2);'
-    '  ctx.strokeStyle = "rgba(168, 245, 230, 0.60)"; ctx.lineWidth = 1.2; ctx.stroke();'
-    '  ctx.restore();'
-    '  const sphereGrad = ctx.createRadialGradient(orbX - 5, orbY - 5, 2, orbX, orbY, 18);'
-    '  sphereGrad.addColorStop(0, "#ffffff");'
-    '  sphereGrad.addColorStop(0.55, "#fbe4b4");'
-    '  sphereGrad.addColorStop(1, "rgba(168, 245, 230, 0.85)");'
-    '  ctx.beginPath(); ctx.arc(orbX, orbY, 18, 0, Math.PI * 2);'
-    '  ctx.fillStyle = sphereGrad; ctx.fill();'
-    '  requestAnimationFrame(animate);'
-    '}'
-    'animate();'
+    '  pearls.forEach(p => { p.y -= p.speed; if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; } ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = p.gold ? "rgba(251, 228, 180, 0.65)" : "rgba(168, 245, 230, 0.55)"; ctx.fill(); });'
+    '  trail.forEach(t => { t.alpha *= 0.92; t.r += 0.35; ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2); ctx.strokeStyle = `rgba(245, 226, 196, ${t.alpha})`; ctx.lineWidth = 1.2; ctx.stroke(); });'
+    '  const pulse = Math.sin(angle * 1.4) * 5; const outerGlow = ctx.createRadialGradient(orbX, orbY, 4, orbX, orbY, 64 + pulse);'
+    '  outerGlow.addColorStop(0, "rgba(255, 253, 248, 0.98)"); outerGlow.addColorStop(0.25, "rgba(251, 228, 180, 0.65)"); outerGlow.addColorStop(0.58, "rgba(168, 245, 230, 0.28)"); outerGlow.addColorStop(1, "rgba(168, 245, 230, 0)");'
+    '  ctx.beginPath(); ctx.arc(orbX, orbY, 64 + pulse, 0, Math.PI * 2); ctx.fillStyle = outerGlow; ctx.fill();'
+    '  ctx.save(); ctx.translate(orbX, orbY); ctx.rotate(angle); ctx.beginPath(); ctx.ellipse(0, 0, 34, 13, 0, 0, Math.PI * 2); ctx.strokeStyle = "rgba(251, 228, 180, 0.65)"; ctx.lineWidth = 1.4; ctx.stroke();'
+    '  ctx.rotate(-angle * 1.8); ctx.beginPath(); ctx.ellipse(0, 0, 28, 11, Math.PI / 3, 0, Math.PI * 2); ctx.strokeStyle = "rgba(168, 245, 230, 0.60)"; ctx.lineWidth = 1.2; ctx.stroke(); ctx.restore();'
+    '  const sphereGrad = ctx.createRadialGradient(orbX - 5, orbY - 5, 2, orbX, orbY, 18); sphereGrad.addColorStop(0, "#ffffff"); sphereGrad.addColorStop(0.55, "#fbe4b4"); sphereGrad.addColorStop(1, "rgba(168, 245, 230, 0.85)");'
+    '  ctx.beginPath(); ctx.arc(orbX, orbY, 18, 0, Math.PI * 2); ctx.fillStyle = sphereGrad; ctx.fill(); requestAnimationFrame(animate);'
+    '} animate();'
 )
+
 ORB_HTML = (
-    '<style>html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }</style>'
-    '<div style="box-sizing:border-box; position:relative; width:100%; height:148px; border-radius:22px; overflow:hidden;'
-    ' background: radial-gradient(circle at 30% 40%, rgba(25,104,115,0.92), rgba(10,48,56,0.96));'
-    ' border: 1px solid rgba(246, 227, 197, 0.38);">'
+    f'{ST_OPEN}html, body {{ margin: 0; padding: 0; background: transparent; overflow: hidden; }}{ST_CLOSE}'
+    '<div style="box-sizing:border-box; position:relative; width:100%; height:148px; border-radius:22px; overflow:hidden; background: radial-gradient(circle at 30% 40%, rgba(25,104,115,0.92), rgba(10,48,56,0.96)); border: 1px solid rgba(246, 227, 197, 0.38);">'
     '<canvas id="orbCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>'
-    '<div style="position:absolute; bottom:10px; right:16px; font-family:\'Plus Jakarta Sans\',sans-serif;'
-    ' font-size:11px; letter-spacing:0.12em; color:#f6e3c5; opacity:0.88; pointer-events:none;">'
-    'MOVE CURSOR TO GUIDE THE SANCTUARY ORB</div>'
-    '</div>'
-    + "<" + "script>" + ORB_JS + "<" + "/script>"
+    '<div style="position:absolute; bottom:10px; right:16px; font-family:\'Plus Jakarta Sans\',sans-serif; font-size:11px; letter-spacing:0.12em; color:#f6e3c5; opacity:0.88; pointer-events:none;">MOVE CURSOR TO GUIDE THE SANCTUARY ORB</div>'
+    f'</div>{SC_OPEN}{ORB_JS}{SC_CLOSE}'
 )
 components.html(ORB_HTML, height=150)
 
@@ -323,7 +300,7 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
                         temperature=0.82,
                         frequency_penalty=0.6,
                     )
-                    reply_text = completion.choices.message.content
+                    reply_text = completion.choices[0].message.content
                     if reply_text:
                         return reply_text.strip()
                 except Exception as e:
@@ -349,13 +326,9 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
     st.markdown(
-        f'<div class="sidebar-lotus-card">'
-        f'<div style="font-size:1.85rem; margin-bottom:0.2rem;">{LOTUS}</div>'
-        f'<div style="font-family:\'Cinzel Decorative\',\'Cormorant Garamond\',serif; font-size:1.25rem; font-weight:700; color:#fbf0dc;">'
-        f'Sanctuary Controls</div>'
-        f'<div style="font-size:0.70rem; letter-spacing:0.14em; text-transform:uppercase; color:#a8f5e6; margin-top:0.25rem;">'
-        f'Twilight Lagoon Retreat</div>'
-        f'</div>',
+        f'<div class="sidebar-lotus-card"><div style="font-size:1.85rem; margin-bottom:0.2rem;">{LOTUS}</div>'
+        f'<div style="font-family:\'Cinzel Decorative\',\'Cormorant Garamond\',serif; font-size:1.25rem; font-weight:700; color:#fbf0dc;">Sanctuary Controls</div>'
+        f'<div style="font-size:0.70rem; letter-spacing:0.14em; text-transform:uppercase; color:#a8f5e6; margin-top:0.25rem;">Twilight Lagoon Retreat</div></div>',
         unsafe_allow_html=True,
     )
 
