@@ -1,347 +1,46 @@
-import asyncio
-import io
-import os
-import time
-import wave
-import edge_tts
-from google import genai
-from google.genai import types
-from groq import Groq
-import numpy as np
-import streamlit as st
-import streamlit.components.v1 as components
+=== MASTER PROJECT MEMORY: LEXICARE (POWERED BY LEXITECH) ===
 
-from lexi_identity import get_lexicare_identity
-from safety_shield import (
-    check_safety_level,
-    render_crisis_card,
-    render_distress_grounding,
-    render_safety_header,
-)
+1. ECOSYSTEM & OWNER:
+- Creator / Developer: Heidi Seckman (LEXITECH Studio, 2026)
+- Existing Separate Project (DO NOT TOUCH): HeidiSeckman/LEXI (legal/tax assistant using ElevenLabs Jessica voice).
+- Current Active Project: HeidiSeckman/LEXICARE (deployed live on Streamlit Community Cloud).
 
-LOTUS = "\U0001fab7"
-HIBISCUS = "\U0001f33a"
-SPARKLE = "\u2728"
+2. PERMANENT, NON-NEGOTIABLE LEXI IDENTITY:
+- Name: LEXI
+- Origin: LEXITECH
+- Creator and developer: Heidi Seckman
+- Year created: 2026
+- Purpose: Developed as the AI assistant for the LEXITECH ecosystem (serving inside LexiCare as a 24/7 safe space, ambient retreat, and AI companion).
+- Voice: Powered by Ava neural voice synthesis (`edge-tts` `en-US-AvaMultilingualNeural`, 100% free, unlimited). The voice engine is NOT her name—her name is always LEXI.
+- Technology providers: Google Gemini, Groq, and neural voice synthesis provide underlying infrastructure. They are NOT LEXI's creator.
 
-st.set_page_config(
-    page_title="LexiCare | Powered by LexiTech",
-    page_icon=LOTUS,
-    layout="centered",
-    initial_sidebar_state="expanded",
-)
+3. REPOSITORY FILES & EXACT FUNCTION SIGNATURES (HeidiSeckman/LEXICARE):
+- `README.md` (Done)
+- `requirements.txt` (Done: `streamlit`, `google-genai`, `edge-tts`, `numpy`, `groq`)
+- `safety_shield.py` (Done — exact exports: `check_safety_level(user_text)`, `render_safety_header()`, `render_crisis_card()`, `render_distress_grounding()`, using `st.session_state.crisis_locked`, `trusted_name`, `trusted_phone`)
+- `lexi_identity.py` (Done — exact export: `get_lexicare_identity(chat_mode, safety_level)`)
+- `app.py` (LIVE & WORKING — locked at the milestone with the floating golden motes in the sidebar).
 
-if "accepted_terms" not in st.session_state:
-    st.session_state.accepted_terms = False
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "voice_enabled" not in st.session_state:
-    st.session_state.voice_enabled = True
-if "chat_mode" not in st.session_state:
-    st.session_state.chat_mode = "Just Listen (Vent)"
-if "latest_voice_bytes" not in st.session_state:
-    st.session_state.latest_voice_bytes = None
+4. LOCKED DESIGN, LANDING PAGE & FEATURE STATE OF `app.py`:
+- Entry / Landing Page Gate: Must keep `st.session_state.accepted_terms` welcome card ("Take a slow breath. Welcome to your sanctuary.") with disclaimer checklist and `Enter Sanctuary` primary button before chat opens.
+- Aesthetic: Luxury Cancun / Hawaii sunlit beachfront resort spa theme (`Cinzel Decorative` + `Cormorant Garamond` serif headers, `Plus Jakarta Sans` body text, sunlit turquoise-teal lagoon gradient `#1b6d79` -> `#114c56` -> `#0a343c`, frosted glass cards, champagne-gold `#f6e3c5` & seafoam `#a8f5e6` accents).
+- Sidebar Styling: Sunlit turquoise-lagoon frosted gradient (NEVER black) with `sidebar-lotus-card` header and drifting golden `sidebar-motes` ("floaties") rising up the sidebar.
+- Background & Visual Elements:
+  1. Right-edge cascading waterfall (`spa-waterfall` with dual speed streams + mist pool) and rolling bottom `lagoon-wave` at `z-index: 1`—strictly tucked BEHIND all cards (`block-container` at `z-index: 25`).
+  2. Glowing champagne-gold lotus blossoms (`golden-lotus`) positioned in open margins (`z-index: 1`).
+  3. Interactive 3D Sanctuary Orb HTML5 canvas (`components.html`, `height=150`) with rotating gold/seafoam orbital rings, cursor ripple trail, and drifting pearls.
+  4. Keep Streamlit Material icon spans (`[data-testid="stIconMaterial"]`) untouched so expander arrows never overlap text.
+  5. Avoid triple-quoted strings (`"""`) when sharing code snippets for iOS/Safari copy-paste to prevent truncation syntax errors.
+- Audio, Toolkit & AI Brain:
+  1. Procedural nature soundscapes (`Ocean Waves`, `Soft Rain`, `Forest Waterfall`) via NumPy/WAV in sidebar.
+  2. Modes: `Just Listen (Vent)`, `Help Me Problem-Solve`, `Distract Me / Play a Game`.
+  3. 60-Second Calm Reset guided breathing timer + Worry Release thought shredder + 3 quick-start mood buttons.
+  4. Dual-cloud failover: Google Gemini (`gemini-2.5-flash` -> `gemini-2.5-pro` -> `gemini-2.0-flash`) + Groq backup (`groq_client.models.list()` auto-detecting active Llama models), skipping `is_greeting` turns so LEXI never repeats her welcome message.
 
-st.markdown(
-    """
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Cinzel+Decorative:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-    <style>
-    :root {
-        --glass-card: rgba(12, 56, 65, 0.90);
-        --gold-champagne: #f6e3c5;
-        --seafoam: #a8f5e6;
-        --text-main: #fbfefd;
-    }
-
-    html, body, .stApp,
-    [data-testid="stAppViewContainer"],
-    [data-testid="stMain"],
-    [data-testid="stBottom"],
-    [data-testid="stBottom"] > div,
-    [data-testid="stBottomBlockContainer"] {
-        background: transparent !important;
-        color: var(--text-main) !important;
-        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    }
-
-    .stApp {
-        background: linear-gradient(145deg, #1b6d79 0%, #114c56 48%, #0a343c 100%) !important;
-        overflow-x: hidden !important;
-    }
-
-    [data-testid="stIconMaterial"], .material-symbols-rounded {
-        font-family: 'Material Symbols Rounded' !important;
-        font-weight: normal !important;
-        font-style: normal !important;
-        letter-spacing: normal !important;
-        text-transform: none !important;
-        display: inline-block !important;
-        white-space: nowrap !important;
-        direction: ltr !important;
-    }
-
-    [data-testid="stHeader"] {
-        background: transparent !important;
-        z-index: 30 !important;
-    }
-
-    [data-testid="stSidebar"],
-    [data-testid="stSidebar"] > div:first-child {
-        background:
-            radial-gradient(circle at 85% 12%, rgba(246, 227, 197, 0.18) 0%, transparent 45%),
-            radial-gradient(circle at 15% 88%, rgba(168, 245, 230, 0.16) 0%, transparent 50%),
-            linear-gradient(180deg, rgba(24, 96, 106, 0.94) 0%, rgba(14, 62, 70, 0.97) 100%) !important;
-        backdrop-filter: blur(22px) !important;
-        border-right: 1px solid rgba(246, 227, 197, 0.35) !important;
-        box-shadow: 6px 0 28px rgba(6, 30, 35, 0.28) !important;
-        z-index: 30 !important;
-    }
-
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span {
-        color: #f9fdfd !important;
-    }
-
-    .main .block-container,
-    [data-testid="stAppViewBlockContainer"] {
-        position: relative !important;
-        z-index: 25 !important;
-    }
-
-    h1, h2, h3, .spa-serif {
-        font-family: 'Cormorant Garamond', Georgia, serif !important;
-        letter-spacing: 0.02em !important;
-        color: var(--gold-champagne) !important;
-    }
-    .spa-waterfall {
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 185px;
-        height: 100vh;
-        z-index: 1;
-        pointer-events: none;
-        background: linear-gradient(90deg, rgba(168, 245, 230, 0) 0%, rgba(168, 245, 230, 0.16) 28%, rgba(230, 255, 252, 0.32) 70%, rgba(246, 227, 197, 0.24) 100%);
-        overflow: hidden;
-    }
-
-    .spa-wf-stream1 {
-        position: absolute;
-        top: -240px;
-        left: 0;
-        width: 100%;
-        height: calc(100% + 240px);
-        background-image: repeating-linear-gradient(90deg, transparent 0px, transparent 8px, rgba(235, 255, 253, 0.30) 11px, transparent 14px, rgba(246, 227, 197, 0.22) 20px, transparent 25px);
-        background-size: 100% 240px;
-        animation: fallSlow 2.2s linear infinite;
-    }
-
-    .spa-wf-stream2 {
-        position: absolute;
-        top: -180px;
-        left: 0;
-        width: 100%;
-        height: calc(100% + 180px);
-        background-image: repeating-linear-gradient(90deg, transparent 0px, rgba(255, 255, 255, 0.45) 2px, transparent 5px, transparent 15px);
-        background-size: 100% 180px;
-        animation: fallFast 1.2s linear infinite;
-    }
-
-    @keyframes fallSlow {
-        0% { transform: translateY(0); }
-        100% { transform: translateY(240px); }
-    }
-
-    @keyframes fallFast {
-        0% { transform: translateY(0); }
-        100% { transform: translateY(180px); }
-    }
-
-    .spa-mist {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        width: 310px;
-        height: 130px;
-        z-index: 1;
-        pointer-events: none;
-        background: radial-gradient(ellipse at 82% 100%, rgba(235, 255, 252, 0.50) 0%, rgba(168, 245, 230, 0.18) 52%, transparent 78%);
-        filter: blur(10px);
-    }
-
-    .lagoon-wave {
-        position: fixed;
-        bottom: -8px;
-        left: 0;
-        width: 200%;
-        height: 145px;
-        z-index: 1;
-        pointer-events: none;
-        animation: waveRoll 14s linear infinite;
-    }
-
-    @keyframes waveRoll {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-50%); }
-    }
-
-    .golden-lotus {
-        position: fixed;
-        z-index: 1;
-        pointer-events: none;
-        opacity: 0.58;
-        filter: drop-shadow(0 0 14px rgba(252, 224, 158, 0.95)) drop-shadow(0 0 32px rgba(242, 196, 108, 0.75));
-        animation: lotusDrift 13s ease-in-out infinite;
-    }
-    .lotus-1 { top: 8%; left: 22rem; width: 105px; animation-delay: 0s; }
-    .lotus-2 { top: 38%; left: 21.5rem; width: 88px; animation-delay: -3s; }
-    .lotus-3 { bottom: 14%; left: 22.5rem; width: 112px; animation-delay: -6s; }
-    .lotus-4 { top: 10%; right: 13%; width: 105px; animation-delay: -2s; }
-    .lotus-5 { top: 42%; right: 14.5%; width: 92px; animation-delay: -5s; }
-    .lotus-6 { bottom: 15%; right: 13.5%; width: 110px; animation-delay: -8s; }
-
-    @keyframes lotusDrift {
-        0%, 100% { transform: translateY(0px) rotate(-3deg) scale(1); }
-        50% { transform: translateY(-16px) rotate(5deg) scale(1.05); }
-    }
-
-    .lexicare-hero {
-        position: relative;
-        z-index: 25;
-        background: linear-gradient(145deg, rgba(16, 68, 78, 0.94), rgba(10, 46, 54, 0.96));
-        backdrop-filter: blur(22px);
-        border: 1px solid rgba(246, 227, 197, 0.48);
-        border-radius: 26px;
-        padding: 2rem 1.8rem 1.8rem;
-        text-align: center;
-        box-shadow: 0 18px 44px rgba(4, 24, 30, 0.42), inset 0 1px 0 rgba(255, 248, 235, 0.28);
-        margin-bottom: 1rem;
-    }
-
-    .lexicare-title {
-        font-family: 'Cinzel Decorative', 'Cormorant Garamond', Georgia, serif !important;
-        font-size: 2.95rem !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.05em !important;
-        background: linear-gradient(90deg, #ffffff 0%, #f6e3c5 50%, #a8f5e6 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 0 !important;
-        line-height: 1.15 !important;
-    }
-
-    .lexicare-pill {
-        display: inline-block;
-        margin-top: 0.75rem;
-        padding: 0.4rem 1.25rem;
-        border-radius: 999px;
-        background: rgba(168, 245, 230, 0.14);
-        border: 1px solid rgba(246, 227, 197, 0.42);
-        color: var(--gold-champagne);
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-    }
-
-    [data-testid="stChatMessage"],
-    [data-testid="stVerticalBlockBorderWrapper"],
-    [data-testid="stExpander"] {
-        position: relative !important;
-        z-index: 25 !important;
-        background: var(--glass-card) !important;
-        backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(246, 227, 197, 0.34) !important;
-        border-radius: 20px !important;
-        box-shadow: 0 10px 28px rgba(4, 24, 30, 0.32) !important;
-    }
-
-    [data-testid="stChatInput"] {
-        position: relative !important;
-        z-index: 30 !important;
-        background: rgba(12, 56, 65, 0.96) !important;
-        border: 1px solid rgba(246, 227, 197, 0.42) !important;
-        border-radius: 18px !important;
-    }
-
-    .stButton > button {
-        background: linear-gradient(135deg, rgba(28, 102, 112, 0.94), rgba(16, 68, 78, 0.96)) !important;
-        color: #fbf0dc !important;
-        border: 1px solid rgba(246, 227, 197, 0.42) !important;
-        border-radius: 14px !important;
-        transition: all 0.22s ease;
-    }
-
-    .stButton > button:hover {
-        border-color: #a8f5e6 !important;
-        box-shadow: 0 0 18px rgba(168, 245, 230, 0.32) !important;
-    }
-
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #2d958a, #1b6867) !important;
-        border: 1px solid #f6e3c5 !important;
-        font-weight: 600 !important;
-    }
-
-    .sidebar-motes {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 21rem;
-        height: 100vh;
-        pointer-events: none;
-        z-index: 31;
-        overflow: hidden;
-    }
-
-    .sidebar-mote {
-        position: absolute;
-        bottom: -10px;
-        border-radius: 50%;
-        background: radial-gradient(circle, #fffdf7 0%, #fbe4b4 55%, transparent 100%);
-        box-shadow: 0 0 8px rgba(251, 228, 180, 0.85);
-        animation: sidebarMoteRise linear infinite;
-    }
-
-    @keyframes sidebarMoteRise {
-        0% { transform: translateY(0px) translateX(0px); opacity: 0; }
-        15% { opacity: 0.85; }
-        85% { opacity: 0.75; }
-        100% { transform: translateY(-102vh) translateX(14px); opacity: 0; }
-    }
-
-    .sidebar-lotus-card {
-        background: linear-gradient(145deg, rgba(246, 227, 197, 0.16), rgba(168, 245, 230, 0.10));
-        border: 1px solid rgba(246, 227, 197, 0.42);
-        border-radius: 18px;
-        padding: 1rem 0.9rem;
-        text-align: center;
-        margin-bottom: 1rem;
-        box-shadow: 0 8px 24px rgba(4, 24, 30, 0.25);
-    }
-    </style>
-
-    <svg class="golden-lotus lotus-1" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/></svg>
-    <svg class="golden-lotus lotus-2" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>
-    <svg class="golden-lotus lotus-3" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/></svg>
-    <svg class="golden-lotus lotus-4" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>
-    <svg class="golden-lotus lotus-5" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/></svg>
-    <svg class="golden-lotus lotus-6" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>
-
-    <div class="spa-waterfall">
-        <div class="spa-wf-stream1"></div>
-        <div class="spa-wf-stream2"></div>
-    </div>
-    <div class="spa-mist"></div>
-    <svg class="lagoon-wave" viewBox="0 0 1440 160" preserveAspectRatio="none">
-        <path d="M0,75 C360,145 720,5 1080,85 C1260,120 1350,95 1440,75 L1440,160 L0,160 Z" fill="rgba(45, 175, 168, 0.24)"></path>
-    </svg>
-    """,
-    unsafe_allow_html=True,
-)
+5. RULES FOR FUTURE EDITS:
+- NEVER remove the `accepted_terms` landing page, the sunlit sidebar with floating golden motes, the 3D orb, or the tucked waterfall.
+- Only make targeted, requested adjustments while preserving everything currently working.
+==================================================================
 @st.cache_data(show_spinner=False)
 def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
     sample_rate = 22050
@@ -380,138 +79,92 @@ def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
 
 
 st.markdown(
-    f"""
-    <div class="lexicare-hero">
-        <h1 class="lexicare-title">{LOTUS} LexiCare</h1>
-        <div class="lexicare-pill">Powered by LexiTech &bull; Private Sanctuary &amp; AI Companion</div>
-    </div>
-    """,
+    f'<div class="lexicare-hero">'
+    f'<h1 class="lexicare-title">{LOTUS} LexiCare</h1>'
+    f'<div class="lexicare-pill">Powered by LexiTech &bull; Private Sanctuary &amp; AI Companion</div>'
+    f'</div>',
     unsafe_allow_html=True,
 )
 
-components.html(
-    """
-    <style>
-        html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
-    </style>
-    <div style="box-sizing:border-box; position:relative; width:100%; height:148px; border-radius:22px; overflow:hidden;
-                background: radial-gradient(circle at 30% 40%, rgba(25,104,115,0.92), rgba(10,48,56,0.96));
-                border: 1px solid rgba(246, 227, 197, 0.38);">
-        <canvas id="orbCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
-        <div style="position:absolute; bottom:10px; right:16px; font-family:'Plus Jakarta Sans',sans-serif;
-                    font-size:11px; letter-spacing:0.12em; color:#f6e3c5; opacity:0.88; pointer-events:none;">
-            MOVE CURSOR TO GUIDE THE SANCTUARY ORB
-        </div>
-    </div>
-    <script>
-        const canvas = document.getElementById('orbCanvas');
-        const ctx = canvas.getContext('2d');
-        function resize() {
-            canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-            canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-        }
-        resize();
-        window.addEventListener('resize', resize);
-
-        let targetX = canvas.offsetWidth * 0.28;
-        let targetY = canvas.offsetHeight * 0.50;
-        let orbX = targetX;
-        let orbY = targetY;
-        let angle = 0;
-
-        const pearls = Array.from({ length: 22 }, (_, i) => ({
-            x: Math.random() * 650,
-            y: Math.random() * 148,
-            r: 1.4 + Math.random() * 2.8,
-            speed: 0.25 + Math.random() * 0.55,
-            gold: i % 2 === 0
-        }));
-
-        const trail = [];
-
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            targetX = e.clientX - rect.left;
-            targetY = e.clientY - rect.top;
-            trail.push({ x: targetX, y: targetY, alpha: 0.55, r: 8 });
-            if (trail.length > 18) trail.shift();
-        });
-
-        function animate() {
-            const w = canvas.offsetWidth;
-            const h = canvas.offsetHeight;
-            ctx.clearRect(0, 0, w, h);
-            angle += 0.025;
-
-            orbX += (targetX - orbX) * 0.08;
-            orbY += (targetY - orbY) * 0.08;
-
-            pearls.forEach(p => {
-                p.y -= p.speed;
-                if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                ctx.fillStyle = p.gold ? 'rgba(251, 228, 180, 0.65)' : 'rgba(168, 245, 230, 0.55)';
-                ctx.fill();
-            });
-
-            trail.forEach(t => {
-                t.alpha *= 0.92;
-                t.r += 0.35;
-                ctx.beginPath();
-                ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(245, 226, 196, ${t.alpha})`;
-                ctx.lineWidth = 1.2;
-                ctx.stroke();
-            });
-
-            const pulse = Math.sin(angle * 1.4) * 5;
-            const outerGlow = ctx.createRadialGradient(orbX, orbY, 4, orbX, orbY, 64 + pulse);
-            outerGlow.addColorStop(0, 'rgba(255, 253, 248, 0.98)');
-            outerGlow.addColorStop(0.25, 'rgba(251, 228, 180, 0.65)');
-            outerGlow.addColorStop(0.58, 'rgba(168, 245, 230, 0.28)');
-            outerGlow.addColorStop(1, 'rgba(168, 245, 230, 0)');
-
-            ctx.beginPath();
-            ctx.arc(orbX, orbY, 64 + pulse, 0, Math.PI * 2);
-            ctx.fillStyle = outerGlow;
-            ctx.fill();
-
-            ctx.save();
-            ctx.translate(orbX, orbY);
-            ctx.rotate(angle);
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 34, 13, 0, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(251, 228, 180, 0.65)';
-            ctx.lineWidth = 1.4;
-            ctx.stroke();
-
-            ctx.rotate(-angle * 1.8);
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 28, 11, Math.PI / 3, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(168, 245, 230, 0.60)';
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
-            ctx.restore();
-
-            const sphereGrad = ctx.createRadialGradient(orbX - 5, orbY - 5, 2, orbX, orbY, 18);
-            sphereGrad.addColorStop(0, '#ffffff');
-            sphereGrad.addColorStop(0.55, '#fbe4b4');
-            sphereGrad.addColorStop(1, 'rgba(168, 245, 230, 0.85)');
-
-            ctx.beginPath();
-            ctx.arc(orbX, orbY, 18, 0, Math.PI * 2);
-            ctx.fillStyle = sphereGrad;
-            ctx.fill();
-
-            requestAnimationFrame(animate);
-        }
-        animate();
-    </script>
-    """,
-    height=150,
+ORB_HTML = (
+    '<style>html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }</style>'
+    '<div style="box-sizing:border-box; position:relative; width:100%; height:148px; border-radius:22px; overflow:hidden;'
+    ' background: radial-gradient(circle at 30% 40%, rgba(25,104,115,0.92), rgba(10,48,56,0.96));'
+    ' border: 1px solid rgba(246, 227, 197, 0.38);">'
+    '<canvas id="orbCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>'
+    '<div style="position:absolute; bottom:10px; right:16px; font-family:\'Plus Jakarta Sans\',sans-serif;'
+    ' font-size:11px; letter-spacing:0.12em; color:#f6e3c5; opacity:0.88; pointer-events:none;">'
+    'MOVE CURSOR TO GUIDE THE SANCTUARY ORB</div>'
+    '</div>'
+    '<script>'
+    'const canvas = document.getElementById("orbCanvas");'
+    'const ctx = canvas.getContext("2d");'
+    'function resize() {'
+    '  canvas.width = canvas.offsetWidth * window.devicePixelRatio;'
+    '  canvas.height = canvas.offsetHeight * window.devicePixelRatio;'
+    '  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);'
+    '}'
+    'resize();'
+    'window.addEventListener("resize", resize);'
+    'let targetX = canvas.offsetWidth * 0.28;'
+    'let targetY = canvas.offsetHeight * 0.50;'
+    'let orbX = targetX; let orbY = targetY; let angle = 0;'
+    'const pearls = Array.from({ length: 22 }, (_, i) => ({'
+    '  x: Math.random() * 650, y: Math.random() * 148,'
+    '  r: 1.4 + Math.random() * 2.8, speed: 0.25 + Math.random() * 0.55, gold: i % 2 === 0'
+    '}));'
+    'const trail = [];'
+    'canvas.addEventListener("mousemove", (e) => {'
+    '  const rect = canvas.getBoundingClientRect();'
+    '  targetX = e.clientX - rect.left; targetY = e.clientY - rect.top;'
+    '  trail.push({ x: targetX, y: targetY, alpha: 0.55, r: 8 });'
+    '  if (trail.length > 18) trail.shift();'
+    '});'
+    'function animate() {'
+    '  const w = canvas.offsetWidth; const h = canvas.offsetHeight;'
+    '  ctx.clearRect(0, 0, w, h);'
+    '  angle += 0.025;'
+    '  orbX += (targetX - orbX) * 0.08; orbY += (targetY - orbY) * 0.08;'
+    '  pearls.forEach(p => {'
+    '    p.y -= p.speed;'
+    '    if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }'
+    '    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);'
+    '    ctx.fillStyle = p.gold ? "rgba(251, 228, 180, 0.65)" : "rgba(168, 245, 230, 0.55)";'
+    '    ctx.fill();'
+    '  });'
+    '  trail.forEach(t => {'
+    '    t.alpha *= 0.92; t.r += 0.35;'
+    '    ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);'
+    '    ctx.strokeStyle = `rgba(245, 226, 196, ${t.alpha})`;'
+    '    ctx.lineWidth = 1.2; ctx.stroke();'
+    '  });'
+    '  const pulse = Math.sin(angle * 1.4) * 5;'
+    '  const outerGlow = ctx.createRadialGradient(orbX, orbY, 4, orbX, orbY, 64 + pulse);'
+    '  outerGlow.addColorStop(0, "rgba(255, 253, 248, 0.98)");'
+    '  outerGlow.addColorStop(0.25, "rgba(251, 228, 180, 0.65)");'
+    '  outerGlow.addColorStop(0.58, "rgba(168, 245, 230, 0.28)");'
+    '  outerGlow.addColorStop(1, "rgba(168, 245, 230, 0)");'
+    '  ctx.beginPath(); ctx.arc(orbX, orbY, 64 + pulse, 0, Math.PI * 2);'
+    '  ctx.fillStyle = outerGlow; ctx.fill();'
+    '  ctx.save(); ctx.translate(orbX, orbY); ctx.rotate(angle);'
+    '  ctx.beginPath(); ctx.ellipse(0, 0, 34, 13, 0, 0, Math.PI * 2);'
+    '  ctx.strokeStyle = "rgba(251, 228, 180, 0.65)"; ctx.lineWidth = 1.4; ctx.stroke();'
+    '  ctx.rotate(-angle * 1.8);'
+    '  ctx.beginPath(); ctx.ellipse(0, 0, 28, 11, Math.PI / 3, 0, Math.PI * 2);'
+    '  ctx.strokeStyle = "rgba(168, 245, 230, 0.60)"; ctx.lineWidth = 1.2; ctx.stroke();'
+    '  ctx.restore();'
+    '  const sphereGrad = ctx.createRadialGradient(orbX - 5, orbY - 5, 2, orbX, orbY, 18);'
+    '  sphereGrad.addColorStop(0, "#ffffff");'
+    '  sphereGrad.addColorStop(0.55, "#fbe4b4");'
+    '  sphereGrad.addColorStop(1, "rgba(168, 245, 230, 0.85)");'
+    '  ctx.beginPath(); ctx.arc(orbX, orbY, 18, 0, Math.PI * 2);'
+    '  ctx.fillStyle = sphereGrad; ctx.fill();'
+    '  requestAnimationFrame(animate);'
+    '}'
+    'animate();'
+    '</script>'
 )
+components.html(ORB_HTML, height=150)
 
 render_safety_header()
 
@@ -583,6 +236,7 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
     )
     full_instruction = system_instruction + anti_repeat_rule
     last_error = ""
+
     gemini_key = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY", "")).strip()
     if gemini_key:
         client = genai.Client(api_key=gemini_key)
@@ -642,39 +296,30 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
             last_error = f"Groq init: {e}"
 
     return f"Connection hiccup ({last_error or 'Missing API key in Streamlit Secrets'}). Check your Secrets tab and try again!"
-
-
 with st.sidebar:
     st.markdown(
-        """
-        <div class="sidebar-motes">
-            <span class="sidebar-mote" style="left:12%; width:3px; height:3px; animation-duration:11s; animation-delay:0s;"></span>
-            <span class="sidebar-mote" style="left:28%; width:4px; height:4px; animation-duration:14s; animation-delay:-3s;"></span>
-            <span class="sidebar-mote" style="left:45%; width:2.5px; height:2.5px; animation-duration:9.5s; animation-delay:-6s;"></span>
-            <span class="sidebar-mote" style="left:62%; width:4.5px; height:4.5px; animation-duration:15s; animation-delay:-2s;"></span>
-            <span class="sidebar-mote" style="left:78%; width:3px; height:3px; animation-duration:12s; animation-delay:-8s;"></span>
-            <span class="sidebar-mote" style="left:18%; width:3.5px; height:3.5px; animation-duration:13s; animation-delay:-5s;"></span>
-            <span class="sidebar-mote" style="left:52%; width:3px; height:3px; animation-duration:10.5s; animation-delay:-9s;"></span>
-            <span class="sidebar-mote" style="left:85%; width:4px; height:4px; animation-duration:16s; animation-delay:-4s;"></span>
-            <span class="sidebar-mote" style="left:36%; width:2.5px; height:2.5px; animation-duration:11.5s; animation-delay:-7s;"></span>
-            <span class="sidebar-mote" style="left:70%; width:3.5px; height:3.5px; animation-duration:13.5s; animation-delay:-1s;"></span>
-        </div>
-        """,
+        '<div class="sidebar-motes">'
+        '<span class="sidebar-mote" style="left:12%; width:3px; height:3px; animation-duration:11s; animation-delay:0s;"></span>'
+        '<span class="sidebar-mote" style="left:28%; width:4px; height:4px; animation-duration:14s; animation-delay:-3s;"></span>'
+        '<span class="sidebar-mote" style="left:45%; width:2.5px; height:2.5px; animation-duration:9.5s; animation-delay:-6s;"></span>'
+        '<span class="sidebar-mote" style="left:62%; width:4.5px; height:4.5px; animation-duration:15s; animation-delay:-2s;"></span>'
+        '<span class="sidebar-mote" style="left:78%; width:3px; height:3px; animation-duration:12s; animation-delay:-8s;"></span>'
+        '<span class="sidebar-mote" style="left:18%; width:3.5px; height:3.5px; animation-duration:13s; animation-delay:-5s;"></span>'
+        '<span class="sidebar-mote" style="left:52%; width:3px; height:3px; animation-duration:10.5s; animation-delay:-9s;"></span>'
+        '<span class="sidebar-mote" style="left:85%; width:4px; height:4px; animation-duration:16s; animation-delay:-4s;"></span>'
+        '<span class="sidebar-mote" style="left:36%; width:2.5px; height:2.5px; animation-duration:11.5s; animation-delay:-7s;"></span>'
+        '<span class="sidebar-mote" style="left:70%; width:3.5px; height:3.5px; animation-duration:13.5s; animation-delay:-1s;"></span>'
+        '</div>',
         unsafe_allow_html=True,
     )
-
     st.markdown(
-        f"""
-        <div class="sidebar-lotus-card">
-            <div style="font-size:1.85rem; margin-bottom:0.2rem;">{LOTUS}</div>
-            <div style="font-family:'Cinzel Decorative','Cormorant Garamond',serif; font-size:1.25rem; font-weight:700; color:#fbf0dc;">
-                Sanctuary Controls
-            </div>
-            <div style="font-size:0.70rem; letter-spacing:0.14em; text-transform:uppercase; color:#a8f5e6; margin-top:0.25rem;">
-                Twilight Lagoon Retreat
-            </div>
-        </div>
-        """,
+        f'<div class="sidebar-lotus-card">'
+        f'<div style="font-size:1.85rem; margin-bottom:0.2rem;">{LOTUS}</div>'
+        f'<div style="font-family:\'Cinzel Decorative\',\'Cormorant Garamond\',serif; font-size:1.25rem; font-weight:700; color:#fbf0dc;">'
+        f'Sanctuary Controls</div>'
+        f'<div style="font-size:0.70rem; letter-spacing:0.14em; text-transform:uppercase; color:#a8f5e6; margin-top:0.25rem;">'
+        f'Twilight Lagoon Retreat</div>'
+        f'</div>',
         unsafe_allow_html=True,
     )
 
@@ -736,7 +381,6 @@ with st.sidebar:
         st.session_state.latest_voice_bytes = None
         st.rerun()
 
-
 if not st.session_state.messages:
     st.session_state.messages.append(
         {
@@ -776,3 +420,19 @@ if prompt:
         st.rerun()
 
     st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user", avatar=SPARKLE):
+        st.write(prompt)
+
+    if safety_level == "DISTRESS":
+        render_distress_grounding()
+
+    system_prompt = get_lexicare_identity(st.session_state.chat_mode, safety_level)
+
+    with st.chat_message("assistant", avatar=LOTUS):
+        with st.spinner("Lexi is listening..."):
+            reply = generate_lexi_reply(system_prompt, st.session_state.messages)
+        st.write(reply)
+        if st.session_state.voice_enabled:
+            speak_text(reply, st.session_state.chat_mode, safety_level)
+
+    st.session_state.messages.append({"role": "assistant", "content": reply})
