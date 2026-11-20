@@ -32,7 +32,7 @@ if "chat_mode" not in st.session_state:
     st.session_state.chat_mode = "Just Listen (Vent)"
 
 st.markdown(
-    """
+    ""
     <style>
     @import url('https://googleapis.com');
 
