@@ -256,21 +256,19 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
         "Always respond directly, warmly, and naturally to the user's latest message."
     )
     full_instruction = system_instruction + anti_repeat_rule
-    last_error = ""
+    errors = []
 
     gemini_key = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY", "")).strip()
     if gemini_key:
         client = genai.Client(api_key=gemini_key)
-        gemini_contents = []
-        for m in convo:
-            role = "user" if m["role"] == "user" else "model"
-            gemini_contents.append(
-                types.Content(
-                    role=role,
-                    parts=[types.Part(text=m["content"])],
-                )
+        gemini_contents = [
+            types.Content(
+                role="user" if m["role"] == "user" else "model",
+                parts=[types.Part(text=m["content"])],
             )
-        for model_name in ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"]:
+            for m in convo
+        ]
+        for model_name in ["gemini-2.5-flash", "gemini-2.0-flash"]:
             try:
                 response = client.models.generate_content(
                     model=model_name,
@@ -283,32 +281,31 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
                 if response.text:
                     return response.text.strip()
             except Exception as e:
-                last_error = f"Gemini: {e}"
+                errors.append(f"{model_name}: {e}")
 
     groq_key = st.secrets.get("GROQ_API_KEY", os.environ.get("GROQ_API_KEY", "")).strip()
     if groq_key:
         try:
             groq_client = Groq(api_key=groq_key)
-            groq_messages = [{"role": "system", "content": full_instruction}]
-            for m in convo:
-                groq_messages.append({"role": m["role"], "content": m["content"]})
+            groq_messages = [{"role": "system", "content": full_instruction}] + [
+                {"role": m["role"], "content": m["content"]} for m in convo
+            ]
             for model_id in ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]:
                 try:
                     completion = groq_client.chat.completions.create(
                         model=model_id,
                         messages=groq_messages,
                         temperature=0.82,
-                        frequency_penalty=0.6,
                     )
-                    reply_text = completion.choices[0].message.content
-                    if reply_text:
-                        return reply_text.strip()
+                    first_choice = completion.choices.__getitem__(0)
+                    if first_choice.message.content:
+                        return first_choice.message.content.strip()
                 except Exception as e:
-                    last_error = f"Groq ({model_id}): {e}"
+                    errors.append(f"{model_id}: {e}")
         except Exception as e:
-            last_error = f"Groq init: {e}"
+            errors.append(f"Groq: {e}")
 
-    return f"Connection hiccup ({last_error or 'Missing API key in Streamlit Secrets'}). Check your Secrets tab and try again!"
+    return "API Error: " + (" | ".join(errors) if errors else "No GEMINI_API_KEY or GROQ_API_KEY found in Streamlit Secrets.")
 with st.sidebar:
     st.markdown(
         '<div class="sidebar-motes">'
