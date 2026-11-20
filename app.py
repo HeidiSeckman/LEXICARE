@@ -433,3 +433,143 @@ with st.sidebar:
         st.session_state.messages = [st.session_state.messages[0]]
         st.session_state.latest_voice_bytes = None
         st.rerun()
+st.markdown(
+    f"""
+    <div class="lexicare-hero">
+        <h1 class="lexicare-title">{LOTUS} LexiCare</h1>
+        <div class="lexicare-pill">Powered by LexiTech &bull; Private Sanctuary &amp; AI Companion</div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.components.v1.html(
+    """
+    <div style="position:relative; width:100%; height:135px; border-radius:20px; overflow:hidden;
+                background: linear-gradient(135deg, rgba(6,27,33,0.95), rgba(13,52,60,0.95));
+                border: 1px solid rgba(235, 213, 179, 0.30); box-shadow: 0 12px 32px rgba(0,0,0,0.45);">
+        <canvas id="orbCanvas" style="width:100%; height:100%; display:block; cursor:crosshair;"></canvas>
+        <div style="position:absolute; bottom:10px; right:16px; font-family:'Plus Jakarta Sans',sans-serif;
+                    font-size:11px; letter-spacing:0.12em; color:#ebd5b3; opacity:0.85; pointer-events:none;">
+            MOVE CURSOR TO GUIDE THE SANCTUARY ORB
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('orbCanvas');
+        const ctx = canvas.getContext('2d');
+        function resize() {
+            canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+            canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        let targetX = canvas.offsetWidth * 0.25;
+        let targetY = canvas.offsetHeight * 0.52;
+        let orbX = targetX;
+        let orbY = targetY;
+
+        const pearls = Array.from({ length: 14 }, (_, i) => ({
+            x: Math.random() * 600,
+            y: Math.random() * 135,
+            r: 1.5 + Math.random() * 2.5,
+            speed: 0.25 + Math.random() * 0.45,
+            gold: i % 3 === 0
+        }));
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            targetX = e.clientX - rect.left;
+            targetY = e.clientY - rect.top;
+        });
+
+        function animate() {
+            const w = canvas.offsetWidth;
+            const h = canvas.offsetHeight;
+            ctx.clearRect(0, 0, w, h);
+
+            orbX += (targetX - orbX) * 0.08;
+            orbY += (targetY - orbY) * 0.08;
+
+            pearls.forEach(p => {
+                p.y -= p.speed;
+                if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.gold ? 'rgba(235, 213, 179, 0.55)' : 'rgba(158, 240, 224, 0.45)';
+                ctx.fill();
+            });
+
+            const glow = ctx.createRadialGradient(orbX, orbY, 4, orbX, orbY, 54);
+            glow.addColorStop(0, 'rgba(255, 252, 245, 0.95)');
+            glow.addColorStop(0.28, 'rgba(235, 213, 179, 0.55)');
+            glow.addColorStop(0.62, 'rgba(158, 240, 224, 0.22)');
+            glow.addColorStop(1, 'rgba(158, 240, 224, 0)');
+
+            ctx.beginPath();
+            ctx.arc(orbX, orbY, 54, 0, Math.PI * 2);
+            ctx.fillStyle = glow;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(orbX, orbY, 13, 0, Math.PI * 2);
+            ctx.fillStyle = '#fffdf8';
+            ctx.fill();
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+    """,
+    height=145,
+)
+
+col_disc, col_sos = st.columns([3.2, 1.3])
+with col_disc:
+    st.caption(
+        "Lexi is an AI companion for reflection and calm—not a therapist or medical professional."
+    )
+with col_sos:
+    if st.button(f"{SOS} Human Support", use_container_width=True):
+        st.session_state.show_human_support = not st.session_state.show_human_support
+
+if st.session_state.show_human_support:
+    render_crisis_banner("HIGH")
+
+render_trusted_person_setup()
+
+for msg in st.session_state.messages:
+    avatar = LOTUS if msg["role"] == "assistant" else SPARKLE
+    with st.chat_message(msg["role"], avatar=avatar):
+        st.markdown(msg["content"])
+
+if st.session_state.latest_voice_bytes and voice_enabled:
+    st.audio(st.session_state.latest_voice_bytes, format="audio/mp3", autoplay=True)
+
+if prompt := st.chat_input("Speak with Lexi..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user", avatar=SPARKLE):
+        st.markdown(prompt)
+
+    safety_level = evaluate_safety(prompt)
+    if safety_level in ("HIGH", "MODERATE"):
+        render_crisis_banner(safety_level)
+
+    with st.chat_message("assistant", avatar=LOTUS):
+        with st.spinner("LEXI is listening..."):
+            reply = get_lexi_response(
+                user_prompt=prompt,
+                messages=st.session_state.messages,
+                chat_mode=chat_mode,
+                safety_level=safety_level,
+            )
+            st.markdown(reply)
+
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+
+    if voice_enabled:
+        voice_data = generate_lexi_voice(reply, chat_mode)
+        st.session_state.latest_voice_bytes = voice_data
+        if voice_data:
+            st.audio(voice_data, format="audio/mp3", autoplay=True)
