@@ -268,7 +268,7 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
             )
             for m in convo
         ]
-        for model_name in ["gemini-3.8-flash", "gemini-3.8-pro", "gemini-3.0-flash", "gemini-2.5-flash"]:
+        for model_name in ["gemini-3.8-flash", "gemini-3.8-flash"]:
             try:
                 response = client.models.generate_content(
                     model=model_name,
@@ -282,22 +282,21 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
                     return response.text.strip()
             except Exception as e:
                 errors.append(f"{model_name}: {e}")
+                time.sleep(1.2)
 
     groq_key = st.secrets.get("GROQ_API_KEY", os.environ.get("GROQ_API_KEY", "")).strip()
     if groq_key:
         try:
             groq_client = Groq(api_key=groq_key)
-            llama_models = [
+            chat_models = [
                 m.id
                 for m in groq_client.models.list().data
-                if "llama" in m.id.lower()
-                and "guard" not in m.id.lower()
-                and "vision" not in m.id.lower()
+                if not any(x in m.id.lower() for x in ["whisper", "guard", "tts", "orpheus", "playai"])
             ]
             groq_messages = [{"role": "system", "content": full_instruction}] + [
                 {"role": m["role"], "content": m["content"]} for m in convo
             ]
-            for model_id in llama_models:
+            for model_id in chat_models[:4]:
                 try:
                     completion = groq_client.chat.completions.create(
                         model=model_id,
