@@ -1,24 +1,26 @@
-import os
-import io
-import wave
-import time
 import asyncio
-import numpy as np
-import streamlit as st
+import io
+import os
+import time
+import wave
 import edge_tts
 from google import genai
 from google.genai import types
 from groq import Groq
+import numpy as np
+import streamlit as st
+import streamlit.components.v1 as components
 
+from lexi_identity import get_lexicare_identity
 from safety_shield import (
     check_safety_level,
-    render_safety_header,
     render_crisis_card,
     render_distress_grounding,
+    render_safety_header,
 )
-from lexi_identity import get_lexicare_identity
 
 LOTUS = "\U0001fab7"
+HIBISCUS = "\U0001f33a"
 SPARKLE = "\u2728"
 
 st.set_page_config(
@@ -28,11 +30,22 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+if "accepted_terms" not in st.session_state:
+    st.session_state.accepted_terms = False
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "voice_enabled" not in st.session_state:
+    st.session_state.voice_enabled = True
+if "chat_mode" not in st.session_state:
+    st.session_state.chat_mode = "Just Listen (Vent)"
+if "latest_voice_bytes" not in st.session_state:
+    st.session_state.latest_voice_bytes = None
+
 st.markdown(
     """
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://googleapis.com/css2?family=Cinzel+Decorative:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
     :root {
@@ -42,7 +55,6 @@ st.markdown(
         --text-main: #fbfefd;
     }
 
-    /* Full Beachfront Lagoon Gradient — Zero Black Bars Anywhere */
     html, body, .stApp,
     [data-testid="stAppViewContainer"],
     [data-testid="stMain"],
@@ -75,12 +87,11 @@ st.markdown(
         z-index: 30 !important;
     }
 
-    /* Luxury Beachfront Spa Sidebar with Golden Lotus Glow */
     [data-testid="stSidebar"],
     [data-testid="stSidebar"] > div:first-child {
         background:
-            radial-gradient(circle at 85% 12%, rgba(246, 227, 197, 0.16) 0%, transparent 45%),
-            radial-gradient(circle at 15% 88%, rgba(168, 245, 230, 0.14) 0%, transparent 50%),
+            radial-gradient(circle at 85% 12%, rgba(246, 227, 197, 0.18) 0%, transparent 45%),
+            radial-gradient(circle at 15% 88%, rgba(168, 245, 230, 0.16) 0%, transparent 50%),
             linear-gradient(180deg, rgba(24, 96, 106, 0.94) 0%, rgba(14, 62, 70, 0.97) 100%) !important;
         backdrop-filter: blur(22px) !important;
         border-right: 1px solid rgba(246, 227, 197, 0.35) !important;
@@ -94,7 +105,6 @@ st.markdown(
         color: #f9fdfd !important;
     }
 
-    /* Keep All Content Cards Strictly Above Background Waterfall & Lotuses */
     .main .block-container,
     [data-testid="stAppViewBlockContainer"] {
         position: relative !important;
@@ -106,20 +116,6 @@ st.markdown(
         letter-spacing: 0.02em !important;
         color: var(--gold-champagne) !important;
     }
-
-    /* Fixed Background Layer (Tucked Behind Boxes at z-index: 1) */
-    .spa-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 1;
-        pointer-events: none;
-        overflow: hidden;
-    }
-
-    /* Animated Right-Edge Cascading Waterfall (Tucked Behind Cards) */
     .spa-waterfall {
         position: fixed;
         top: 0;
@@ -175,11 +171,28 @@ st.markdown(
         background: radial-gradient(ellipse at 82% 100%, rgba(235, 255, 252, 0.50) 0%, rgba(168, 245, 230, 0.18) 52%, transparent 78%);
         filter: blur(10px);
     }
+
+    .lagoon-wave {
+        position: fixed;
+        bottom: -8px;
+        left: 0;
+        width: 200%;
+        height: 145px;
+        z-index: 1;
+        pointer-events: none;
+        animation: waveRoll 14s linear infinite;
+    }
+
+    @keyframes waveRoll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
     .golden-lotus {
         position: fixed;
         z-index: 1;
         pointer-events: none;
-        opacity: 0.55;
+        opacity: 0.58;
         filter: drop-shadow(0 0 14px rgba(252, 224, 158, 0.95)) drop-shadow(0 0 32px rgba(242, 196, 108, 0.75));
         animation: lotusDrift 13s ease-in-out infinite;
     }
@@ -200,44 +213,50 @@ st.markdown(
         z-index: 25;
         background: linear-gradient(145deg, rgba(16, 68, 78, 0.94), rgba(10, 46, 54, 0.96));
         backdrop-filter: blur(22px);
-        border: 1px solid rgba(246, 227, 197, 0.42);
+        border: 1px solid rgba(246, 227, 197, 0.48);
         border-radius: 26px;
         padding: 2rem 1.8rem 1.8rem;
         text-align: center;
-        box-shadow: 0 18px 44px rgba(4, 24, 30, 0.42);
+        box-shadow: 0 18px 44px rgba(4, 24, 30, 0.42), inset 0 1px 0 rgba(255, 248, 235, 0.28);
         margin-bottom: 1rem;
     }
 
     .lexicare-title {
-        font-family: 'Cormorant Garamond', Georgia, serif !important;
-        font-size: 3.15rem !important;
-        font-weight: 600 !important;
-        color: #fbf0dc !important;
+        font-family: 'Cinzel Decorative', 'Cormorant Garamond', Georgia, serif !important;
+        font-size: 2.95rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+        background: linear-gradient(90deg, #ffffff 0%, #f6e3c5 50%, #a8f5e6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin: 0 !important;
-        line-height: 1.08 !important;
+        line-height: 1.15 !important;
     }
 
     .lexicare-pill {
         display: inline-block;
         margin-top: 0.75rem;
-        padding: 0.38rem 1.15rem;
+        padding: 0.4rem 1.25rem;
         border-radius: 999px;
         background: rgba(168, 245, 230, 0.14);
-        border: 1px solid rgba(246, 227, 197, 0.38);
+        border: 1px solid rgba(246, 227, 197, 0.42);
         color: var(--gold-champagne);
         font-size: 0.72rem;
         font-weight: 600;
-        letter-spacing: 0.14em;
+        letter-spacing: 0.15em;
         text-transform: uppercase;
     }
 
-    [data-testid="stChatMessage"], [data-testid="stExpander"] {
+    [data-testid="stChatMessage"],
+    [data-testid="stVerticalBlockBorderWrapper"],
+    [data-testid="stExpander"] {
         position: relative !important;
         z-index: 25 !important;
         background: var(--glass-card) !important;
         backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(246, 227, 197, 0.30) !important;
+        border: 1px solid rgba(246, 227, 197, 0.34) !important;
         border-radius: 20px !important;
+        box-shadow: 0 10px 28px rgba(4, 24, 30, 0.32) !important;
     }
 
     [data-testid="stChatInput"] {
@@ -253,11 +272,23 @@ st.markdown(
         color: #fbf0dc !important;
         border: 1px solid rgba(246, 227, 197, 0.42) !important;
         border-radius: 14px !important;
+        transition: all 0.22s ease;
+    }
+
+    .stButton > button:hover {
+        border-color: #a8f5e6 !important;
+        box-shadow: 0 0 18px rgba(168, 245, 230, 0.32) !important;
+    }
+
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #2d958a, #1b6867) !important;
+        border: 1px solid #f6e3c5 !important;
+        font-weight: 600 !important;
     }
 
     .sidebar-lotus-card {
-        background: linear-gradient(145deg, rgba(246, 227, 197, 0.14), rgba(168, 245, 230, 0.08));
-        border: 1px solid rgba(246, 227, 197, 0.38);
+        background: linear-gradient(145deg, rgba(246, 227, 197, 0.16), rgba(168, 245, 230, 0.10));
+        border: 1px solid rgba(246, 227, 197, 0.42);
         border-radius: 18px;
         padding: 1rem 0.9rem;
         text-align: center;
@@ -278,39 +309,40 @@ st.markdown(
         <div class="spa-wf-stream2"></div>
     </div>
     <div class="spa-mist"></div>
+    <svg class="lagoon-wave" viewBox="0 0 1440 160" preserveAspectRatio="none">
+        <path d="M0,75 C360,145 720,5 1080,85 C1260,120 1350,95 1440,75 L1440,160 L0,160 Z" fill="rgba(45, 175, 168, 0.24)"></path>
+    </svg>
     """,
     unsafe_allow_html=True,
 )
 @st.cache_data(show_spinner=False)
-def generate_soundscape_wav(sound_type: str) -> bytes:
+def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
     sample_rate = 22050
-    duration = 12.0
-    t = np.linspace(0, duration, int(sample_rate * duration), endpoint=False)
+    n_samples = sample_rate * duration_sec
     rng = np.random.default_rng(42)
-
+    white = rng.standard_normal(n_samples)
+    b = np.cumsum(white)
+    b = b - np.mean(b)
+    b = b / (np.max(np.abs(b)) + 1e-6)
+    kernel_size = 35 if sound_type == "Soft Rain" else 90
+    kernel = np.ones(kernel_size) / kernel_size
+    smooth_noise = np.convolve(white, kernel, mode="same")
+    smooth_noise = smooth_noise / (np.max(np.abs(smooth_noise)) + 1e-6)
+    t = np.linspace(0, duration_sec, n_samples, endpoint=False)
     if sound_type == "Ocean Waves":
-        noise = rng.normal(0, 1, size=t.shape)
-        surf = np.convolve(noise, np.ones(65) / 65.0, mode="same")
-        swell = 0.55 + 0.45 * np.sin(2 * np.pi * (1.0 / 6.0) * t - np.pi / 2)
-        wave_audio = surf * swell * 2.8
-    elif sound_type == "Soft Rain":
-        noise = rng.normal(0, 1, size=t.shape)
-        rain = np.convolve(noise, np.ones(18) / 18.0, mode="same")
-        droplets = (rng.random(size=t.shape) > 0.9965).astype(float) * rng.normal(0, 0.45, size=t.shape)
-        wave_audio = (rain * 1.3 + droplets) * 0.65
+        swell = 0.45 + 0.55 * (0.5 * (1 + np.sin(2 * np.pi * t / 8.5)))
+        audio = (0.65 * b + 0.35 * smooth_noise) * swell
+    elif sound_type == "Forest Waterfall":
+        gentle_flow = 0.88 + 0.12 * np.sin(2 * np.pi * t / 5.0)
+        audio = (0.55 * b + 0.45 * smooth_noise) * gentle_flow
     else:
-        noise = rng.normal(0, 1, size=t.shape)
-        low_rumble = np.convolve(noise, np.ones(90) / 90.0, mode="same") * 2.2
-        mist_hiss = np.convolve(noise, np.ones(14) / 14.0, mode="same") * 0.45
-        wave_audio = (low_rumble + mist_hiss) * 0.75
-
-    fade = int(sample_rate * 0.8)
-    wave_audio[:fade] *= np.linspace(0, 1, fade)
-    wave_audio[-fade:] *= np.linspace(1, 0, fade)
-
-    max_val = np.max(np.abs(wave_audio)) or 1.0
-    pcm = np.int16((wave_audio / max_val) * 26000)
-
+        rain_patter = np.convolve(white, np.ones(12) / 12, mode="same")
+        rain_patter = rain_patter / (np.max(np.abs(rain_patter)) + 1e-6)
+        audio = 0.35 * b + 0.45 * smooth_noise + 0.20 * rain_patter
+    fade_len = int(sample_rate * 1.5)
+    audio[:fade_len] *= np.linspace(0, 1, fade_len)
+    audio[-fade_len:] *= np.linspace(1, 0, fade_len)
+    pcm = np.int16(np.clip(audio * 0.35, -1.0, 1.0) * 32767)
     buf = io.BytesIO()
     with wave.open(buf, "wb") as wf:
         wf.setnchannels(1)
@@ -318,197 +350,6 @@ def generate_soundscape_wav(sound_type: str) -> bytes:
         wf.setframerate(sample_rate)
         wf.writeframes(pcm.tobytes())
     return buf.getvalue()
-
-
-async def _synthesize_ava_async(text: str, rate: str, pitch: str) -> bytes:
-    communicate = edge_tts.Communicate(
-        text=text,
-        voice="en-US-AvaMultilingualNeural",
-        rate=rate,
-        pitch=pitch,
-    )
-    chunks = bytearray()
-    async for chunk in communicate.stream():
-        if chunk["type"] == "audio":
-            chunks.extend(chunk["data"])
-    return bytes(chunks)
-
-
-def generate_lexi_voice(text: str, chat_mode: str):
-    clean_text = text.replace("*", "").replace("#", "").strip()
-    if not clean_text:
-        return None
-    if len(clean_text) > 900:
-        clean_text = clean_text[:900] + "..."
-
-    if chat_mode == "Just Listen (Vent)":
-        rate, pitch = "-6%", "-2Hz"
-    elif chat_mode == "Distract Me / Play a Game":
-        rate, pitch = "+2%", "+1Hz"
-    else:
-        rate, pitch = "-2%", "+0Hz"
-
-    try:
-        return asyncio.run(_synthesize_ava_async(clean_text, rate, pitch))
-    except Exception:
-        return None
-
-
-def get_lexi_response(user_prompt: str, messages: list, chat_mode: str, safety_level: str) -> str:
-    system_instruction = get_lexicare_identity(chat_mode=chat_mode, safety_level=safety_level)
-    prior_turns = messages[1:-1] if len(messages) > 2 else []
-
-    gemini_key = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY", ""))
-    if gemini_key:
-        try:
-            client = genai.Client(api_key=gemini_key)
-            contents = []
-            for msg in prior_turns[-12:]:
-                role = "user" if msg["role"] == "user" else "model"
-                contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])]))
-            contents.append(types.Content(role="user", parts=[types.Part.from_text(text=user_prompt)]))
-
-            for model_name in ("gemini-2.5-flash", "gemini-2.0-flash"):
-                try:
-                    response = client.models.generate_content(
-                        model=model_name,
-                        contents=contents,
-                        config=types.GenerateContentConfig(
-                            system_instruction=system_instruction,
-                            temperature=0.65,
-                            max_output_tokens=700,
-                        ),
-                    )
-                    if response and response.text:
-                        return response.text.strip()
-                except Exception:
-                    continue
-        except Exception:
-            pass
-
-    groq_key = st.secrets.get("GROQ_API_KEY", os.environ.get("GROQ_API_KEY", ""))
-    if groq_key:
-        try:
-            groq_client = Groq(api_key=groq_key)
-            available_models = groq_client.models.list()
-            llama_models = [
-                m.id
-                for m in available_models.data
-                if "llama" in m.id.lower() and "guard" not in m.id.lower() and "vision" not in m.id.lower()
-            ]
-            chosen_model = llama_models[0] if llama_models else "llama-3.3-70b-versatile"
-
-            groq_messages = [{"role": "system", "content": system_instruction}]
-            for msg in prior_turns[-12:]:
-                groq_messages.append({"role": msg["role"], "content": msg["content"]})
-            groq_messages.append({"role": "user", "content": user_prompt})
-
-            completion = groq_client.chat.completions.create(
-                model=chosen_model,
-                messages=groq_messages,
-                temperature=0.65,
-                max_tokens=700,
-            )
-            reply = completion.choices[0].message.content
-            if reply:
-                return reply.strip()
-        except Exception:
-            pass
-
-    return (
-        "I am right here with you in the sanctuary. My cloud connection flickered for just a moment—"
-        "take a slow breath and send that again whenever you are ready."
-    )
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {
-            "role": "assistant",
-            "content": (
-                "Hey... welcome in. Take a breath, watch the waterfall cascade behind us, "
-                "and turn on some ocean waves or soft rain in the sidebar if you'd like. "
-                "Whether you want to vent, work through something on your mind, or just be distracted "
-                "for a little while, I'm right here."
-            ),
-        }
-    ]
-
-if "crisis_locked" not in st.session_state:
-    st.session_state.crisis_locked = False
-
-if "latest_voice_bytes" not in st.session_state:
-    st.session_state.latest_voice_bytes = None
-
-
-with st.sidebar:
-    st.markdown(
-        f"""
-        <div class="sidebar-lotus-card">
-            <div style="font-size:1.8rem; margin-bottom:0.2rem;">{LOTUS}</div>
-            <div style="font-family:'Cormorant Garamond',serif; font-size:1.45rem; font-weight:600; color:#fbf0dc;">
-                Sanctuary Controls
-            </div>
-            <div style="font-size:0.72rem; letter-spacing:0.12em; text-transform:uppercase; color:#a8f5e6; margin-top:0.2rem;">
-                Twilight Lagoon Retreat
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    chat_mode = st.selectbox(
-        "How can LEXI support you right now?",
-        options=[
-            "Just Listen (Vent)",
-            "Help Me Problem-Solve",
-            "Distract Me / Play a Game",
-        ],
-        index=0,
-    )
-
-    voice_enabled = st.toggle("LEXI Voice Replies (Ava Neural)", value=True)
-
-    st.markdown("---")
-    st.markdown(f"### {LOTUS} Ambient Soundscapes")
-    sound_choice = st.selectbox(
-        "Choose a soothing backdrop",
-        options=["None", "Ocean Waves", "Soft Rain", "Forest Waterfall"],
-        index=0,
-    )
-    if sound_choice != "None":
-        st.audio(generate_soundscape_wav(sound_choice), format="audio/wav", loop=True)
-
-    st.markdown("---")
-    st.markdown(f"### {LOTUS} 60-Second Calm Reset")
-    if st.button("Start 60s Guided Breath", use_container_width=True):
-        breath_box = st.empty()
-        cycles = [
-            ("Inhale slowly through your nose...", 4),
-            ("Hold gently at the top...", 4),
-            ("Exhale long and soft...", 6),
-        ]
-        for _ in range(4):
-            for label, secs in cycles:
-                for sec in range(secs, 0, -1):
-                    breath_box.info(f"**{label}** ({sec}s)")
-                    time.sleep(1)
-        breath_box.success("Beautiful. Notice your shoulders dropping.")
-
-    st.markdown("---")
-    st.markdown(f"### {LOTUS} Worry Release")
-    worry_text = st.text_area(
-        "Write down a heavy thought to let go of:",
-        placeholder="Type anything weighing on you, then dissolve it into the lagoon...",
-        height=85,
-    )
-    if st.button("Dissolve Into the Water", use_container_width=True):
-        if worry_text.strip():
-            st.toast("Released. Watching it drift away with the tide...", icon=LOTUS)
-
-    st.markdown("---")
-    if st.button("Clear Conversation", use_container_width=True):
-        st.session_state.messages = [st.session_state.messages[0]]
-        st.session_state.latest_voice_bytes = None
-        st.rerun()
 
 
 st.markdown(
@@ -521,7 +362,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.components.v1.html(
+components.html(
     """
     <style>
         html, body { margin: 0; padding: 0; background: transparent; overflow: hidden; }
@@ -647,44 +488,262 @@ st.components.v1.html(
 
 render_safety_header()
 
-if st.session_state.crisis_locked:
+if st.session_state.get("crisis_locked", False):
     render_crisis_card()
-else:
-    for msg in st.session_state.messages:
-        avatar = LOTUS if msg["role"] == "assistant" else SPARKLE
-        with st.chat_message(msg["role"], avatar=avatar):
-            st.markdown(msg["content"])
+    st.stop()
 
-    if st.session_state.latest_voice_bytes and voice_enabled:
-        st.audio(st.session_state.latest_voice_bytes, format="audio/mp3", autoplay=True)
+if not st.session_state.accepted_terms:
+    with st.container(border=True):
+        st.subheader("Take a slow breath. Welcome to your sanctuary.")
+        st.write(
+            "LexiCare is a peaceful, judgment-free retreat to talk through your day, "
+            "unwind to ocean waves or rain, and reset whenever life feels heavy."
+        )
+        st.info(
+            "**Before stepping inside, please confirm:**\n"
+            "- Lexi is an AI companion—not a licensed therapist, doctor, or counselor.\n"
+            "- Lexi cannot diagnose conditions or automatically call 911 for you.\n"
+            "- If you are ever in immediate danger, tap **Human Support** at the top or call **988** / **911**."
+        )
+        agreed = st.checkbox(
+            "I understand that LexiCare is an AI wellness companion and not medical or therapy care."
+        )
+        if st.button("Enter Sanctuary", type="primary", disabled=not agreed):
+            st.session_state.accepted_terms = True
+            st.rerun()
+    st.stop()
+async def _synthesize_ava_async(text: str, rate: str, pitch: str) -> bytes:
+    communicate = edge_tts.Communicate(
+        text,
+        "en-US-AvaMultilingualNeural",
+        rate=rate,
+        pitch=pitch,
+    )
+    chunks = bytearray()
+    async for chunk in communicate.stream():
+        if chunk["type"] == "audio":
+            chunks.extend(chunk["data"])
+    return bytes(chunks)
 
-    if prompt := st.chat_input("Speak with Lexi..."):
-        safety_level = check_safety_level(prompt)
-        if safety_level == "CRISIS":
-            st.session_state.crisis_locked = True
+
+def speak_text(text: str, mode: str, safety_level: str):
+    clean = text.replace("*", "").replace("#", "").strip()
+    if not clean:
+        return
+    if safety_level == "DISTRESS":
+        rate, pitch = "-10%", "-2Hz"
+    elif mode == "Just Listen (Vent)":
+        rate, pitch = "-6%", "-1Hz"
+    elif mode == "Distract Me / Play a Game":
+        rate, pitch = "+2%", "+1Hz"
+    else:
+        rate, pitch = "-3%", "+0Hz"
+    try:
+        audio_bytes = asyncio.run(_synthesize_ava_async(clean, rate, pitch))
+        if audio_bytes:
+            st.session_state.latest_voice_bytes = audio_bytes
+            st.audio(audio_bytes, format="audio/mp3", autoplay=True)
+    except Exception:
+        pass
+
+
+def generate_lexi_reply(system_instruction: str, messages: list) -> str:
+    convo = [m for m in messages if not m.get("is_greeting")][-10:]
+    anti_repeat_rule = (
+        "\nCRITICAL CONVERSATION RULE: Read the entire conversation history carefully. "
+        "NEVER repeat your greeting or repeat sentences you already said. "
+        "Always respond directly, warmly, and naturally to the user's latest message."
+    )
+    full_instruction = system_instruction + anti_repeat_rule
+    last_error = ""
+    gemini_key = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY", "")).strip()
+    if gemini_key:
+        client = genai.Client(api_key=gemini_key)
+        gemini_contents = []
+        for m in convo:
+            role = "user" if m["role"] == "user" else "model"
+            gemini_contents.append(
+                types.Content(
+                    role=role,
+                    parts=[types.Part(text=m["content"])],
+                )
+            )
+        for model_name in ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"]:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=gemini_contents,
+                    config=types.GenerateContentConfig(
+                        system_instruction=full_instruction,
+                        temperature=0.82,
+                    ),
+                )
+                if response.text:
+                    return response.text.strip()
+            except Exception as e:
+                last_error = f"Gemini: {e}"
+
+    groq_key = st.secrets.get("GROQ_API_KEY", os.environ.get("GROQ_API_KEY", "")).strip()
+    if groq_key:
+        try:
+            groq_client = Groq(api_key=groq_key)
+            available = [
+                m.id
+                for m in groq_client.models.list().data
+                if "whisper" not in m.id.lower()
+                and "guard" not in m.id.lower()
+                and "tts" not in m.id.lower()
+            ]
+            preferred = [m for m in available if "llama" in m.lower()] + available
+            groq_messages = [{"role": "system", "content": full_instruction}]
+            for m in convo:
+                groq_messages.append({"role": m["role"], "content": m["content"]})
+            for model_id in preferred[:4]:
+                try:
+                    completion = groq_client.chat.completions.create(
+                        model=model_id,
+                        messages=groq_messages,
+                        temperature=0.82,
+                        frequency_penalty=0.6,
+                    )
+                    reply_text = completion.choices.message.content
+                    if reply_text:
+                        return reply_text.strip()
+                except Exception as e:
+                    last_error = f"Groq ({model_id}): {e}"
+        except Exception as e:
+            last_error = f"Groq init: {e}"
+
+    return f"Connection hiccup ({last_error or 'Missing API key in Streamlit Secrets'}). Check your Secrets tab and try again!"
+
+
+with st.sidebar:
+    st.markdown(
+        f"""
+        <div class="sidebar-lotus-card">
+            <div style="font-size:1.85rem; margin-bottom:0.2rem;">{LOTUS}</div>
+            <div style="font-family:'Cinzel Decorative','Cormorant Garamond',serif; font-size:1.25rem; font-weight:700; color:#fbf0dc;">
+                Sanctuary Controls
+            </div>
+            <div style="font-size:0.70rem; letter-spacing:0.14em; text-transform:uppercase; color:#a8f5e6; margin-top:0.25rem;">
+                Twilight Lagoon Retreat
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.header(f"{LOTUS} Spa Soundscapes")
+    ambient_choice = st.selectbox(
+        "Ambient Sanctuary Audio",
+        ["Off", "Ocean Waves", "Soft Rain", "Forest Waterfall"],
+    )
+    if ambient_choice != "Off":
+        sound_bytes = generate_nature_sound(ambient_choice)
+        st.audio(sound_bytes, format="audio/wav", loop=True, autoplay=True)
+        st.caption(f"Streaming {ambient_choice.lower()} in the background.")
+
+    st.divider()
+    st.header(f"{HIBISCUS} Sanctuary Mode")
+    st.session_state.chat_mode = st.radio(
+        "How should Lexi support you?",
+        [
+            "Just Listen (Vent)",
+            "Help Me Problem-Solve",
+            "Distract Me / Play a Game",
+        ],
+    )
+    st.session_state.voice_enabled = st.toggle(
+        "Lexi Voice Replies (Ava • Unlimited)", value=True
+    )
+
+    st.divider()
+    st.subheader(f"{LOTUS} 60-Second Calm Reset")
+    if st.button("Start Guided Breathing", use_container_width=True):
+        placeholder = st.empty()
+        steps = [
+            ("Breathe IN slowly through your nose...", 4),
+            ("HOLD gently...", 4),
+            ("Breathe OUT slowly through your mouth...", 6),
+        ]
+        for _ in range(3):
+            for label, secs in steps:
+                for s in range(secs, 0, -1):
+                    placeholder.info(f"**{label}** ({s}s)")
+                    time.sleep(1)
+        placeholder.success("Nice job. Let your shoulders drop.")
+
+    st.divider()
+    st.subheader(f"{LOTUS} Worry Release")
+    worry = st.text_area(
+        "Write a thought you want to let go of:",
+        placeholder="Type it here, then release it into the tide...",
+        height=80,
+    )
+    if st.button("Release Thought", use_container_width=True):
+        if worry.strip():
+            st.toast(f"Released and washed away. {LOTUS}")
             st.rerun()
 
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user", avatar=SPARKLE):
-            st.markdown(prompt)
+    st.divider()
+    if st.button("Clear Conversation", use_container_width=True):
+        st.session_state.messages = []
+        st.session_state.latest_voice_bytes = None
+        st.rerun()
 
-        if safety_level == "DISTRESS":
-            render_distress_grounding()
 
-        with st.chat_message("assistant", avatar=LOTUS):
-            with st.spinner("LEXI is listening..."):
-                reply = get_lexi_response(
-                    user_prompt=prompt,
-                    messages=st.session_state.messages,
-                    chat_mode=chat_mode,
-                    safety_level=safety_level,
-                )
-                st.markdown(reply)
+if not st.session_state.messages:
+    st.session_state.messages.append(
+        {
+            "role": "assistant",
+            "is_greeting": True,
+            "content": (
+                "Hey... welcome in. Take a breath, watch the waterfall cascade on the right, and turn on "
+                "some ocean waves or soft rain in the sidebar if you'd like. Whether you want to vent about "
+                "a heavy day, sort through something on your mind, or just want company—I'm right here. "
+                "How are you feeling right now?"
+            ),
+        }
+    )
 
-        st.session_state.messages.append({"role": "assistant", "content": reply})
+for msg in st.session_state.messages:
+    avatar = LOTUS if msg["role"] == "assistant" else SPARKLE
+    with st.chat_message(msg["role"], avatar=avatar):
+        st.write(msg["content"])
 
-        if voice_enabled:
-            voice_data = generate_lexi_voice(reply, chat_mode)
-            st.session_state.latest_voice_bytes = voice_data
-            if voice_data:
-                st.audio(voice_data, format="audio/mp3", autoplay=True)
+st.caption("Need a starting point? Tap one:")
+q1, q2, q3 = st.columns(3)
+quick_prompt = None
+if q1.button("I'm feeling overwhelmed", use_container_width=True):
+    quick_prompt = "I'm feeling really overwhelmed right now and just need someone to talk to."
+if q2.button("Can't sleep / lonely", use_container_width=True):
+    quick_prompt = "I'm up late feeling lonely and my brain won't turn off."
+if q3.button("Play a calming game", use_container_width=True):
+    quick_prompt = "Can we play a fun, low-stress mini-game right here in chat to distract me?"
+
+user_input = st.chat_input("Speak with Lexi...")
+prompt = quick_prompt or user_input
+
+if prompt:
+    safety_level = check_safety_level(prompt)
+    if safety_level == "CRISIS":
+        st.session_state.crisis_locked = True
+        st.rerun()
+
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user", avatar=SPARKLE):
+        st.write(prompt)
+
+    if safety_level == "DISTRESS":
+        render_distress_grounding()
+
+    system_instruction = get_lexicare_identity(st.session_state.chat_mode, safety_level)
+    with st.chat_message("assistant", avatar=LOTUS):
+        with st.spinner("Lexi is listening..."):
+            reply = generate_lexi_reply(system_instruction, st.session_state.messages)
+            st.write(reply)
+
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+
+    if st.session_state.voice_enabled:
+        speak_text(reply, st.session_state.chat_mode, safety_level)
