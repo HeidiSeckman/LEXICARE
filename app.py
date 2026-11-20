@@ -466,7 +466,7 @@ components.html(
                 t.r += 0.35;
                 ctx.beginPath();
                 ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
-                ctx.strokeStyle = `rgba(245, 226, 196, ${t.alpha})`;
+                ctx.strokeStyle = 'rgba(245, 226, 196, ' + t.alpha + ')';
                 ctx.lineWidth = 1.2;
                 ctx.stroke();
             });
