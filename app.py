@@ -286,6 +286,41 @@ st.markdown(
         font-weight: 600 !important;
     }
 
+    .lagoon-motes {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .sidebar-motes {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 21rem;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 31;
+        overflow: hidden;
+    }
+
+    .sidebar-mote {
+        position: absolute;
+        bottom: -10px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #fffdf7 0%, #fbe4b4 55%, transparent 100%);
+        box-shadow: 0 0 8px rgba(251, 228, 180, 0.85);
+        animation: sidebarMoteRise linear infinite;
+    }
+
+    @keyframes sidebarMoteRise {
+        0% { transform: translateY(0px) translateX(0px); opacity: 0; }
+        15% { opacity: 0.85; }
+        85% { opacity: 0.75; }
+        100% { transform: translateY(-102vh) translateX(14px); opacity: 0; }
+    }
+
     .sidebar-lotus-card {
         background: linear-gradient(145deg, rgba(246, 227, 197, 0.16), rgba(168, 245, 230, 0.10));
         border: 1px solid rgba(246, 227, 197, 0.42);
@@ -297,24 +332,21 @@ st.markdown(
     }
     </style>
 
+    <div class="lagoon-motes">
+        <span class="sidebar-mote" style="left:24%; width:3.5px; height:3.5px; animation-duration:13s; animation-delay:0s;"></span>
+        <span class="sidebar-mote" style="left:31%; width:4px; height:4px; animation-duration:16s; animation-delay:-4s;"></span>
+        <span class="sidebar-mote" style="left:39%; width:3px; height:3px; animation-duration:12s; animation-delay:-7s;"></span>
+        <span class="sidebar-mote" style="left:58%; width:3.5px; height:3.5px; animation-duration:14.5s; animation-delay:-2s;"></span>
+        <span class="sidebar-mote" style="left:67%; width:4px; height:4px; animation-duration:17s; animation-delay:-9s;"></span>
+        <span class="sidebar-mote" style="left:75%; width:3px; height:3px; animation-duration:12.5s; animation-delay:-5s;"></span>
+        <span class="sidebar-mote" style="left:82%; width:4.5px; height:4.5px; animation-duration:15.5s; animation-delay:-1s;"></span>
+        <span class="sidebar-mote" style="left:89%; width:3px; height:3px; animation-duration:13.5s; animation-delay:-6s;"></span>
+    </div>
+
     <svg class="golden-lotus lotus-1" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/></svg>
     <svg class="golden-lotus lotus-2" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>
     <svg class="golden-lotus lotus-3" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 77C34 70 18 57 12 42C33 45 47 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/><path d="M60 77C86 70 102 57 108 42C87 45 73 57 60 77Z" fill="#f5e2c4" fill-opacity="0.65"/></svg>
     <svg class="golden-lotus lotus-4" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>
-    <svg class="golden-lotus lotus-5" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.95"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.80"/></svg>
-    <svg class="golden-lotus lotus-6" viewBox="0 0 120 120" fill="none"><path d="M60 12C69 34 73 52 60 74C47 52 51 34 60 12Z" fill="#fbe4b4" fill-opacity="0.92"/><path d="M60 74C40 57 30 42 28 24C47 34 55 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/><path d="M60 74C80 57 90 42 92 24C73 34 65 51 60 74Z" fill="#f5e2c4" fill-opacity="0.78"/></svg>
-
-    <div class="spa-waterfall">
-        <div class="spa-wf-stream1"></div>
-        <div class="spa-wf-stream2"></div>
-    </div>
-    <div class="spa-mist"></div>
-    <svg class="lagoon-wave" viewBox="0 0 1440 160" preserveAspectRatio="none">
-        <path d="M0,75 C360,145 720,5 1080,85 C1260,120 1350,95 1440,75 L1440,160 L0,160 Z" fill="rgba(45, 175, 168, 0.24)"></path>
-    </svg>
-    """,
-    unsafe_allow_html=True,
-)
 @st.cache_data(show_spinner=False)
 def generate_nature_sound(sound_type: str, duration_sec: int = 25) -> bytes:
     sample_rate = 22050
@@ -619,6 +651,24 @@ def generate_lexi_reply(system_instruction: str, messages: list) -> str:
 
 with st.sidebar:
     st.markdown(
+        """
+        <div class="sidebar-motes">
+            <span class="sidebar-mote" style="left:12%; width:3px; height:3px; animation-duration:11s; animation-delay:0s;"></span>
+            <span class="sidebar-mote" style="left:28%; width:4px; height:4px; animation-duration:14s; animation-delay:-3s;"></span>
+            <span class="sidebar-mote" style="left:45%; width:2.5px; height:2.5px; animation-duration:9.5s; animation-delay:-6s;"></span>
+            <span class="sidebar-mote" style="left:62%; width:4.5px; height:4.5px; animation-duration:15s; animation-delay:-2s;"></span>
+            <span class="sidebar-mote" style="left:78%; width:3px; height:3px; animation-duration:12s; animation-delay:-8s;"></span>
+            <span class="sidebar-mote" style="left:18%; width:3.5px; height:3.5px; animation-duration:13s; animation-delay:-5s;"></span>
+            <span class="sidebar-mote" style="left:52%; width:3px; height:3px; animation-duration:10.5s; animation-delay:-9s;"></span>
+            <span class="sidebar-mote" style="left:85%; width:4px; height:4px; animation-duration:16s; animation-delay:-4s;"></span>
+            <span class="sidebar-mote" style="left:36%; width:2.5px; height:2.5px; animation-duration:11.5s; animation-delay:-7s;"></span>
+            <span class="sidebar-mote" style="left:70%; width:3.5px; height:3.5px; animation-duration:13.5s; animation-delay:-1s;"></span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
         f"""
         <div class="sidebar-lotus-card">
             <div style="font-size:1.85rem; margin-bottom:0.2rem;">{LOTUS}</div>
@@ -731,19 +781,3 @@ if prompt:
         st.rerun()
 
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar=SPARKLE):
-        st.write(prompt)
-
-    if safety_level == "DISTRESS":
-        render_distress_grounding()
-
-    system_instruction = get_lexicare_identity(st.session_state.chat_mode, safety_level)
-    with st.chat_message("assistant", avatar=LOTUS):
-        with st.spinner("Lexi is listening..."):
-            reply = generate_lexi_reply(system_instruction, st.session_state.messages)
-            st.write(reply)
-
-    st.session_state.messages.append({"role": "assistant", "content": reply})
-
-    if st.session_state.voice_enabled:
-        speak_text(reply, st.session_state.chat_mode, safety_level)
