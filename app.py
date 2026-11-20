@@ -251,7 +251,7 @@ st.markdown(
     """
 )
 
- <div class="sanctuary-water">
+<div class="sanctuary-water">
         <svg class="lotus-flower lotus-1" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.8">
             <path d="M100 25 C122 62 122 92 100 115 C78 92 78 62 100 25 Z"/>
             <path d="M100 115 C68 95 45 68 38 40 C68 48 88 75 100 115 Z"/>
