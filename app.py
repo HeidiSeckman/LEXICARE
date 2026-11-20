@@ -3,7 +3,6 @@ import io
 import wave
 import time
 import asyncio
-import html
 import numpy as np
 import streamlit as st
 import edge_tts
@@ -14,19 +13,17 @@ from groq import Groq
 from safety_shield import evaluate_safety, render_crisis_banner, render_trusted_person_setup
 from lexi_identity import get_lexicare_identity
 
-# ==============================================================================
-# PAGE CONFIG
-# ==============================================================================
+LOTUS = "\U0001fab7"
+SPARKLE = "\u2728"
+SOS = "\U0001f198"
+
 st.set_page_config(
     page_title="LexiCare | Powered by LexiTech",
-    page_icon="🪷",
+    page_icon=LOTUS,
     layout="centered",
     initial_sidebar_state="expanded",
 )
 
-# ==============================================================================
-# LUXURY SPA TYPOGRAPHY, WATERFALL & GLOWING GOLDEN LOTUS CSS
-# ==============================================================================
 st.markdown(
     """
     <link rel="preconnect" href="https://googleapis.com">
@@ -35,27 +32,19 @@ st.markdown(
 
     <style>
     :root {
-        --bg-deep: #041216;
-        --bg-lagoon: #0b2d34;
-        --bg-teal: #144d56;
-        --glass-card: rgba(6, 25, 31, 0.88);
-        --glass-elevated: rgba(9, 34, 41, 0.92);
+        --glass-card: rgba(6, 26, 32, 0.92);
         --gold-champagne: #ebd5b3;
-        --gold-glow: rgba(235, 213, 179, 0.42);
         --seafoam: #9ef0e0;
         --text-main: #f5f9f9;
-        --text-soft: #cde0e2;
     }
 
-    /* Base Sanctuary Canvas */
     html, body, [data-testid="stAppViewContainer"], .stApp {
-        background: radial-gradient(circle at 20% 15%, #144d56 0%, #09262d 42%, #041216 100%) !important;
+        background: radial-gradient(circle at 20% 15%, #144d56 0%, #09262d 44%, #041216 100%) !important;
         color: var(--text-main) !important;
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
         overflow-x: hidden;
     }
 
-    /* Keep Streamlit Material Symbols intact so expander arrows never glitch */
     [data-testid="stIconMaterial"], .material-symbols-rounded {
         font-family: 'Material Symbols Rounded' !important;
         font-weight: normal !important;
@@ -64,20 +53,18 @@ st.markdown(
         text-transform: none !important;
         display: inline-block !important;
         white-space: nowrap !important;
-        word-wrap: normal !important;
         direction: ltr !important;
     }
 
-    /* Force ALL main content strictly ABOVE background waterfall & lotus layers */
     [data-testid="stHeader"] {
         background: transparent !important;
         z-index: 30 !important;
     }
 
     [data-testid="stSidebar"] {
-        background: rgba(4, 18, 22, 0.94) !important;
+        background: rgba(4, 18, 22, 0.96) !important;
         backdrop-filter: blur(20px) !important;
-        border-right: 1px solid rgba(235, 213, 179, 0.16) !important;
+        border-right: 1px solid rgba(235, 213, 179, 0.18) !important;
         z-index: 30 !important;
     }
 
@@ -89,7 +76,6 @@ st.markdown(
         z-index: 20 !important;
     }
 
-    /* Typography */
     h1, h2, h3, .spa-serif {
         font-family: 'Cormorant Garamond', Georgia, serif !important;
         letter-spacing: 0.02em !important;
@@ -99,10 +85,6 @@ st.markdown(
     p, div, span, label, input, textarea, button {
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
-
-    /* ==========================================================================
-       BACKGROUND LAYER (z-index: 1 — STRICTLY TUCKED BEHIND ALL BOXES)
-       ========================================================================== */
     .sanctuary-bg-layer {
         position: fixed;
         inset: 0;
@@ -111,79 +93,41 @@ st.markdown(
         overflow: hidden;
     }
 
-    /* Glowing Faint Golden Lotus Blossoms */
     .golden-lotus {
         position: absolute;
-        opacity: 0.22;
-        filter: drop-shadow(0 0 18px rgba(235, 213, 179, 0.65)) drop-shadow(0 0 36px rgba(246, 200, 120, 0.35));
+        opacity: 0.26;
+        filter: drop-shadow(0 0 18px rgba(235, 213, 179, 0.75)) drop-shadow(0 0 38px rgba(246, 200, 120, 0.45));
         animation: lotusFloat 18s ease-in-out infinite;
     }
-    .lotus-1 { top: 8%; left: 6%; width: 130px; animation-delay: 0s; }
-    .lotus-2 { top: 38%; left: 12%; width: 95px; opacity: 0.17; animation-delay: -5s; }
-    .lotus-3 { bottom: 18%; left: 5%; width: 150px; opacity: 0.20; animation-delay: -9s; }
-    .lotus-4 { top: 14%; right: 17%; width: 110px; opacity: 0.18; animation-delay: -3s; }
-    .lotus-5 { bottom: 26%; right: 19%; width: 135px; opacity: 0.21; animation-delay: -12s; }
+    .lotus-1 { top: 7%; left: 5%; width: 135px; animation-delay: 0s; }
+    .lotus-2 { top: 42%; left: 10%; width: 105px; opacity: 0.20; animation-delay: -5s; }
+    .lotus-3 { bottom: 16%; left: 4%; width: 155px; opacity: 0.24; animation-delay: -9s; }
+    .lotus-4 { top: 12%; right: 16%; width: 115px; opacity: 0.22; animation-delay: -3s; }
+    .lotus-5 { bottom: 24%; right: 18%; width: 140px; opacity: 0.24; animation-delay: -12s; }
 
     @keyframes lotusFloat {
         0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
         50% { transform: translateY(-16px) rotate(4deg) scale(1.04); }
     }
 
-    /* Right-Edge Cascading Waterfall (Tucked behind boxes) */
     .waterfall-column {
         position: fixed;
         top: 0;
         right: 0;
-        width: 155px;
+        width: 150px;
         height: 100vh;
         z-index: 1;
         pointer-events: none;
-        background: linear-gradient(
-            90deg,
-            rgba(158, 240, 224, 0.00) 0%,
-            rgba(158, 240, 224, 0.08) 28%,
-            rgba(215, 250, 248, 0.20) 65%,
-            rgba(235, 213, 179, 0.14) 100%
-        );
+        background: linear-gradient(90deg, rgba(158, 240, 224, 0) 0%, rgba(158, 240, 224, 0.08) 30%, rgba(215, 250, 248, 0.20) 68%, rgba(235, 213, 179, 0.14) 100%);
         overflow: hidden;
     }
 
     .waterfall-stream {
         position: absolute;
         inset: -100% 0 0 0;
-        background-image:
-            repeating-linear-gradient(
-                90deg,
-                transparent 0px,
-                transparent 10px,
-                rgba(224, 252, 250, 0.16) 12px,
-                transparent 15px,
-                rgba(235, 213, 179, 0.10) 22px,
-                transparent 26px
-            ),
-            linear-gradient(
-                180deg,
-                rgba(255, 255, 255, 0.04) 0%,
-                rgba(158, 240, 224, 0.22) 50%,
-                rgba(255, 255, 255, 0.06) 100%
-            );
+        background-image: repeating-linear-gradient(90deg, transparent 0px, transparent 10px, rgba(224, 252, 250, 0.17) 12px, transparent 15px, rgba(235, 213, 179, 0.11) 22px, transparent 26px);
         background-size: 100% 240px;
         animation: cascadeFall 2.6s linear infinite;
-    }
-
-    .waterfall-shimmer {
-        position: absolute;
-        inset: -100% 0 0 0;
-        background-image: repeating-linear-gradient(
-            90deg,
-            transparent 0px,
-            rgba(255, 255, 255, 0.24) 2px,
-            transparent 6px,
-            transparent 19px
-        );
-        background-size: 100% 180px;
-        opacity: 0.55;
-        animation: cascadeFall 1.7s linear infinite;
     }
 
     .waterfall-mist {
@@ -194,7 +138,6 @@ st.markdown(
         height: 110px;
         background: radial-gradient(ellipse at 80% 100%, rgba(210, 250, 246, 0.32) 0%, rgba(158, 240, 224, 0.10) 45%, transparent 75%);
         filter: blur(10px);
-        animation: mistPulse 4s ease-in-out infinite;
     }
 
     @keyframes cascadeFall {
@@ -202,26 +145,17 @@ st.markdown(
         100% { transform: translateY(240px); }
     }
 
-    @keyframes mistPulse {
-        0%, 100% { opacity: 0.65; transform: scale(1); }
-        50% { opacity: 0.95; transform: scale(1.06); }
-    }
-
-    /* ==========================================================================
-       FROSTED GLASS HERO & CHAT CARDS (Opaque enough to hide waterfall behind)
-       ========================================================================== */
     .lexicare-hero {
         position: relative;
         z-index: 25;
-        background: linear-gradient(145deg, rgba(8, 33, 40, 0.92), rgba(5, 21, 26, 0.95));
+        background: linear-gradient(145deg, rgba(8, 33, 40, 0.95), rgba(5, 21, 26, 0.97));
         backdrop-filter: blur(22px);
-        -webkit-backdrop-filter: blur(22px);
-        border: 1px solid rgba(235, 213, 179, 0.34);
+        border: 1px solid rgba(235, 213, 179, 0.35);
         border-radius: 26px;
-        padding: 2.1rem 1.8rem 1.9rem;
+        padding: 2rem 1.8rem 1.8rem;
         text-align: center;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(235, 213, 179, 0.22);
-        margin-bottom: 1.1rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+        margin-bottom: 1rem;
     }
 
     .lexicare-title {
@@ -231,7 +165,6 @@ st.markdown(
         color: #f6e6cc !important;
         margin: 0 !important;
         line-height: 1.08 !important;
-        text-shadow: 0 2px 20px rgba(235, 213, 179, 0.28);
     }
 
     .lexicare-pill {
@@ -248,47 +181,43 @@ st.markdown(
         text-transform: uppercase;
     }
 
-    /* Chat Message Cards */
-    [data-testid="stChatMessage"] {
+    [data-testid="stChatMessage"], [data-testid="stExpander"] {
         position: relative !important;
         z-index: 25 !important;
         background: var(--glass-card) !important;
         backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(235, 213, 179, 0.22) !important;
-        border-radius: 20px !important;
-        padding: 1rem 1.2rem !important;
-        margin-bottom: 0.85rem !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.38) !important;
-    }
-
-    [data-testid="stChatMessage"] p,
-    [data-testid="stChatMessage"] li {
-        color: #f4f9f9 !important;
-        font-size: 0.98rem !important;
-        line-height: 1.65 !important;
-    }
-
-    /* Expander & Inputs */
-    [data-testid="stExpander"] {
-        position: relative !important;
-        z-index: 25 !important;
-        background: var(--glass-card) !important;
-        backdrop-filter: blur(18px) !important;
         border: 1px solid rgba(235, 213, 179, 0.24) !important;
-        border-radius: 16px !important;
+        border-radius: 20px !important;
     }
 
     [data-testid="stChatInput"] {
         position: relative !important;
         z-index: 30 !important;
-        background: rgba(5, 22, 27, 0.95) !important;
+        background: rgba(5, 22, 27, 0.96) !important;
         border: 1px solid rgba(235, 213, 179, 0.35) !important;
         border-radius: 18px !important;
     }
-# ==============================================================================
-# PROCEDURAL NATURE SOUNDSCAPE GENERATOR (NUMPY -> WAV)
-# ==============================================================================
+
+    .stButton > button {
+        background: linear-gradient(135deg, rgba(20, 77, 86, 0.94), rgba(10, 42, 49, 0.96)) !important;
+        color: #f7ead5 !important;
+        border: 1px solid rgba(235, 213, 179, 0.35) !important;
+        border-radius: 14px !important;
+    }
+    </style>
+
+    <div class="sanctuary-bg-layer">
+        <svg class="golden-lotus lotus-1" viewBox="0 0 120 120" fill="none"><path d="M60 15C68 35 72 52 60 72C48 52 52 35 60 15Z" fill="#ebd5b3" fill-opacity="0.75"/><path d="M60 72C42 56 32 42 30 25C48 34 56 50 60 72Z" fill="#ebd5b3" fill-opacity="0.55"/><path d="M60 72C78 56 88 42 90 25C72 34 64 50 60 72Z" fill="#ebd5b3" fill-opacity="0.55"/><path d="M60 75C36 68 20 56 14 42C34 45 48 56 60 75Z" fill="#ebd5b3" fill-opacity="0.4"/><path d="M60 75C84 68 100 56 106 42C86 45 72 56 60 75Z" fill="#ebd5b3" fill-opacity="0.4"/></svg>
+        <svg class="golden-lotus lotus-2" viewBox="0 0 120 120" fill="none"><path d="M60 15C68 35 72 52 60 72C48 52 52 35 60 15Z" fill="#ebd5b3" fill-opacity="0.7"/><path d="M60 72C42 56 32 42 30 25C48 34 56 50 60 72Z" fill="#ebd5b3" fill-opacity="0.5"/><path d="M60 72C78 56 88 42 90 25C72 34 64 50 60 72Z" fill="#ebd5b3" fill-opacity="0.5"/></svg>
+        <svg class="golden-lotus lotus-3" viewBox="0 0 120 120" fill="none"><path d="M60 15C68 35 72 52 60 72C48 52 52 35 60 15Z" fill="#ebd5b3" fill-opacity="0.75"/><path d="M60 72C42 56 32 42 30 25C48 34 56 50 60 72Z" fill="#ebd5b3" fill-opacity="0.55"/><path d="M60 72C78 56 88 42 90 25C72 34 64 50 60 72Z" fill="#ebd5b3" fill-opacity="0.55"/><path d="M60 75C36 68 20 56 14 42C34 45 48 56 60 75Z" fill="#ebd5b3" fill-opacity="0.4"/><path d="M60 75C84 68 100 56 106 42C86 45 72 56 60 75Z" fill="#ebd5b3" fill-opacity="0.4"/></svg>
+        <svg class="golden-lotus lotus-4" viewBox="0 0 120 120" fill="none"><path d="M60 15C68 35 72 52 60 72C48 52 52 35 60 15Z" fill="#ebd5b3" fill-opacity="0.7"/><path d="M60 72C42 56 32 42 30 25C48 34 56 50 60 72Z" fill="#ebd5b3" fill-opacity="0.5"/><path d="M60 72C78 56 88 42 90 25C72 34 64 50 60 72Z" fill="#ebd5b3" fill-opacity="0.5"/></svg>
+        <svg class="golden-lotus lotus-5" viewBox="0 0 120 120" fill="none"><path d="M60 15C68 35 72 52 60 72C48 52 52 35 60 15Z" fill="#ebd5b3" fill-opacity="0.75"/><path d="M60 72C42 56 32 42 30 25C48 34 56 50 60 72Z" fill="#ebd5b3" fill-opacity="0.55"/><path d="M60 72C78 56 88 42 90 25C72 34 64 50 60 72Z" fill="#ebd5b3" fill-opacity="0.55"/><path d="M60 75C36 68 20 56 14 42C34 45 48 56 60 75Z" fill="#ebd5b3" fill-opacity="0.4"/><path d="M60 75C84 68 100 56 106 42C86 45 72 56 60 75Z" fill="#ebd5b3" fill-opacity="0.4"/></svg>
+        <div class="waterfall-column"><div class="waterfall-stream"></div></div>
+        <div class="waterfall-mist"></div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 @st.cache_data(show_spinner=False)
 def generate_soundscape_wav(sound_type: str) -> bytes:
     sample_rate = 22050
@@ -298,27 +227,23 @@ def generate_soundscape_wav(sound_type: str) -> bytes:
 
     if sound_type == "Ocean Waves":
         noise = rng.normal(0, 1, size=t.shape)
-        kernel = np.ones(65) / 65.0
-        surf = np.convolve(noise, kernel, mode="same")
+        surf = np.convolve(noise, np.ones(65) / 65.0, mode="same")
         swell = 0.55 + 0.45 * np.sin(2 * np.pi * (1.0 / 6.0) * t - np.pi / 2)
         wave_audio = surf * swell * 2.8
     elif sound_type == "Soft Rain":
         noise = rng.normal(0, 1, size=t.shape)
-        kernel = np.ones(18) / 18.0
-        rain = np.convolve(noise, kernel, mode="same")
+        rain = np.convolve(noise, np.ones(18) / 18.0, mode="same")
         droplets = (rng.random(size=t.shape) > 0.9965).astype(float) * rng.normal(0, 0.45, size=t.shape)
         wave_audio = (rain * 1.3 + droplets) * 0.65
-    else:  # Forest Waterfall
+    else:
         noise = rng.normal(0, 1, size=t.shape)
         low_rumble = np.convolve(noise, np.ones(90) / 90.0, mode="same") * 2.2
         mist_hiss = np.convolve(noise, np.ones(14) / 14.0, mode="same") * 0.45
         wave_audio = (low_rumble + mist_hiss) * 0.75
 
-    fade_samples = int(sample_rate * 0.8)
-    fade_in = np.linspace(0, 1, fade_samples)
-    fade_out = np.linspace(1, 0, fade_samples)
-    wave_audio[:fade_samples] *= fade_in
-    wave_audio[-fade_samples:] *= fade_out
+    fade = int(sample_rate * 0.8)
+    wave_audio[:fade] *= np.linspace(0, 1, fade)
+    wave_audio[-fade:] *= np.linspace(1, 0, fade)
 
     max_val = np.max(np.abs(wave_audio)) or 1.0
     pcm = np.int16((wave_audio / max_val) * 26000)
@@ -332,9 +257,6 @@ def generate_soundscape_wav(sound_type: str) -> bytes:
     return buf.getvalue()
 
 
-# ==============================================================================
-# UNLIMITED AVA NEURAL VOICE SYNTHESIS (EDGE-TTS)
-# ==============================================================================
 async def _synthesize_ava_async(text: str, rate: str, pitch: str) -> bytes:
     communicate = edge_tts.Communicate(
         text=text,
@@ -342,14 +264,14 @@ async def _synthesize_ava_async(text: str, rate: str, pitch: str) -> bytes:
         rate=rate,
         pitch=pitch,
     )
-    audio_chunks = bytearray()
+    chunks = bytearray()
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
-            audio_chunks.extend(chunk["data"])
-    return bytes(audio_chunks)
+            chunks.extend(chunk["data"])
+    return bytes(chunks)
 
 
-def generate_lexi_voice(text: str, chat_mode: str) -> bytes | None:
+def generate_lexi_voice(text: str, chat_mode: str):
     clean_text = text.replace("*", "").replace("#", "").strip()
     if not clean_text:
         return None
@@ -369,13 +291,8 @@ def generate_lexi_voice(text: str, chat_mode: str) -> bytes | None:
         return None
 
 
-# ==============================================================================
-# DUAL-CLOUD AI BRAIN (GEMINI PRIMARY + GROQ AUTO-FAILOVER)
-# ==============================================================================
 def get_lexi_response(user_prompt: str, messages: list, chat_mode: str, safety_level: str) -> str:
     system_instruction = get_lexicare_identity(chat_mode=chat_mode, safety_level=safety_level)
-
-    # Skip initial greeting (index 0) so LEXI never repeats her welcome message
     prior_turns = messages[1:-1] if len(messages) > 2 else []
 
     gemini_key = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY", ""))
@@ -385,12 +302,8 @@ def get_lexi_response(user_prompt: str, messages: list, chat_mode: str, safety_l
             contents = []
             for msg in prior_turns[-12:]:
                 role = "user" if msg["role"] == "user" else "model"
-                contents.append(
-                    types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])])
-                )
-            contents.append(
-                types.Content(role="user", parts=[types.Part.from_text(text=user_prompt)])
-            )
+                contents.append(types.Content(role=role, parts=[types.Part.from_text(text=msg["content"])]))
+            contents.append(types.Content(role="user", parts=[types.Part.from_text(text=user_prompt)]))
 
             for model_name in ("gemini-2.5-flash", "gemini-2.0-flash"):
                 try:
@@ -420,7 +333,7 @@ def get_lexi_response(user_prompt: str, messages: list, chat_mode: str, safety_l
                 for m in available_models.data
                 if "llama" in m.id.lower() and "guard" not in m.id.lower() and "vision" not in m.id.lower()
             ]
-            chosen_model = llama_models[0] if llama_models else "llama-3.3-70b-versatile"
+            chosen_model = llama_models if llama_models else "llama-3.3-70b-versatile"
 
             groq_messages = [{"role": "system", "content": system_instruction}]
             for msg in prior_turns[-12:]:
@@ -433,7 +346,7 @@ def get_lexi_response(user_prompt: str, messages: list, chat_mode: str, safety_l
                 temperature=0.65,
                 max_tokens=700,
             )
-            reply = completion.choices[0].message.content
+            reply = completion.choices.message.content
             if reply:
                 return reply.strip()
         except Exception:
@@ -443,11 +356,6 @@ def get_lexi_response(user_prompt: str, messages: list, chat_mode: str, safety_l
         "I am right here with you in the sanctuary. My cloud connection flickered for just a moment—"
         "take a slow breath and send that again whenever you are ready."
     )
-
-
-# ==============================================================================
-# SESSION STATE INITIALIZATION
-# ==============================================================================
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
@@ -468,11 +376,8 @@ if "latest_voice_bytes" not in st.session_state:
     st.session_state.latest_voice_bytes = None
 
 
-# ==============================================================================
-# SIDEBAR: SANCTUARY CONTROLS & CALM TOOLKIT
-# ==============================================================================
 with st.sidebar:
-    st.markdown("## 🪷 Sanctuary Controls")
+    st.markdown(f"## {LOTUS} Sanctuary Controls")
 
     chat_mode = st.selectbox(
         "How can LEXI support you right now?",
@@ -484,21 +389,20 @@ with st.sidebar:
         index=0,
     )
 
-    voice_enabled = st.toggle("🔊 LEXI Voice Replies (Ava Neural)", value=True)
+    voice_enabled = st.toggle("LEXI Voice Replies (Ava Neural)", value=True)
 
     st.markdown("---")
-    st.markdown("### 🌊 Ambient Soundscapes")
+    st.markdown("### Ambient Soundscapes")
     sound_choice = st.selectbox(
         "Choose a soothing backdrop",
         options=["None", "Ocean Waves", "Soft Rain", "Forest Waterfall"],
         index=0,
     )
     if sound_choice != "None":
-        wav_bytes = generate_soundscape_wav(sound_choice)
-        st.audio(wav_bytes, format="audio/wav", loop=True)
+        st.audio(generate_soundscape_wav(sound_choice), format="audio/wav", loop=True)
 
     st.markdown("---")
-    st.markdown("### 🌬️ 60-Second Calm Reset")
+    st.markdown("### 60-Second Calm Reset")
     if st.button("Start 60s Guided Breath", use_container_width=True):
         breath_box = st.empty()
         cycles = [
@@ -511,10 +415,10 @@ with st.sidebar:
                 for sec in range(secs, 0, -1):
                     breath_box.info(f"**{label}** ({sec}s)")
                     time.sleep(1)
-        breath_box.success("✨ Beautiful. Notice your shoulders dropping.")
+        breath_box.success("Beautiful. Notice your shoulders dropping.")
 
     st.markdown("---")
-    st.markdown("### 🍃 Worry Release")
+    st.markdown("### Worry Release")
     worry_text = st.text_area(
         "Write down a heavy thought to let go of:",
         placeholder="Type anything weighing on you, then dissolve it into the lagoon...",
@@ -522,19 +426,10 @@ with st.sidebar:
     )
     if st.button("Dissolve Into the Water", use_container_width=True):
         if worry_text.strip():
-            st.toast("🍃 Released. Watching it drift away with the tide...", icon="🪷")
+            st.toast("Released. Watching it drift away with the tide...", icon=LOTUS)
 
     st.markdown("---")
-    if st.button("🌿 Clear Conversation", use_container_width=True):
+    if st.button("Clear Conversation", use_container_width=True):
         st.session_state.messages = [st.session_state.messages[0]]
         st.session_state.latest_voice_bytes = None
         st.rerun()
-
-
-# ==============================================================================
-# HERO BANNER & INTERACTIVE FLOATING PEARL ORB CANVAS
-# ==============================================================================
-st.markdown(
-    """
-    <div class="lexicare-hero">
-        <h1 class="lexicare-title">🪷 LexiCare</h1>
