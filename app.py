@@ -248,6 +248,7 @@ st.markdown(
         100% { transform: translateX(-50%); }
     }
     </style>
+    """
 
     <div class="sanctuary-water">
         <svg class="lotus-flower lotus-1" viewBox="0 0 200 200" fill="none" stroke="#ebd5b3" stroke-width="1.8">
